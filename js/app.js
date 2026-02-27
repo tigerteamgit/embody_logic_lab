@@ -1,572 +1,438 @@
 /* ---- Creative Expansion Lab: app.js ---- */
-/* Build stamp (change this line to force a visible diff in commits): 2026-02-27-JS-01 */
+/* Build stamp (change this line to force a visible diff in commits): 2026-02-27-01 */
 
-/* ---- Boot ---- */
+/* ---- App bootstrap ---- */
 (() => {
   "use strict";
 
-  /* ---- Storage ---- */
-  const STORAGE_KEY = "cel_attempts_v1";
+  document.addEventListener("DOMContentLoaded", () => {
 
-  /* ---- Helpers ---- */
-  function byId(id){ return document.getElementById(id); }
-  function val(id){ const el=byId(id); return el ? el.value.trim() : ""; }
-  function num(id){
-    const el = byId(id);
-    if(!el) return null;
-    const v = el.value === "" ? null : Number(el.value);
-    return Number.isFinite(v) ? v : null;
-  }
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;");
-  }
-  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-  function fmtTime(sec){
-    const m = Math.floor(sec/60);
-    const s = sec%60;
-    return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  }
+    /* ---- Storage ---- */
+    const STORAGE_KEY = "cel_attempts_v1";
 
-  /* ---- Round definitions (Somatic first) ---- */
-  const ROUNDS = [
-    {
-      id: "somatic",
-      title: "Round 1 — Somatic Expansion (Body → Mind)",
-      desc: "No equipment. Self-timed. Enter results. Same protocol for Baseline + Post.",
-      timedSeconds: 0,
-      render: (state) => `
-        <div class="notice"><strong>Instructions:</strong> Do each test safely. Use a phone timer if needed. Enter honest results.</div>
-
-        <h3 style="margin-top:10px;">Test 1 — Forward Fold Reach (0–20)</h3>
-        <label>Select your best match</label>
-        <select id="s1_fold">
-          <option value="">Select…</option>
-          <option value="0"  ${state.s1_fold==0  ? "selected":""}>0 — Hands above knees</option>
-          <option value="5"  ${state.s1_fold==5  ? "selected":""}>5 — Fingertips to shins</option>
-          <option value="10" ${state.s1_fold==10 ? "selected":""}>10 — Fingertips to ankles</option>
-          <option value="15" ${state.s1_fold==15 ? "selected":""}>15 — Touch toes</option>
-          <option value="20" ${state.s1_fold==20 ? "selected":""}>20 — Palms flat on floor</option>
-        </select>
-
-        <div class="hr"></div>
-
-        <h3>Test 2 — Cross-Body Coordination (30 sec)</h3>
-        <p class="muted">Opposite elbow to knee, alternating, for 30 seconds. Count smooth reps.</p>
-        <label>Reps in 30 seconds</label>
-        <input id="s2_reps" type="number" min="0" max="200" value="${state.s2_reps ?? ""}" placeholder="e.g., 18" />
-
-        <div class="hr"></div>
-
-        <h3>Test 3 — Balance (Eyes closed)</h3>
-        <p class="muted">Single leg, eyes closed. Time until you step/wobble out.</p>
-        <label>Seconds held</label>
-        <input id="s3_balance_sec" type="number" min="0" max="300" value="${state.s3_balance_sec ?? ""}" placeholder="e.g., 12" />
-
-        <div class="hr"></div>
-
-        <h3>Test 4 — Recovery (15 squats)</h3>
-        <p class="muted">Do 15 bodyweight squats. Time until your breathing feels calm again.</p>
-        <label>Seconds to calm breathing</label>
-        <input id="s4_recovery_sec" type="number" min="0" max="600" value="${state.s4_recovery_sec ?? ""}" placeholder="e.g., 55" />
-      `,
-      collect: (state) => {
-        const fold = byId("s1_fold")?.value;
-        state.s1_fold = fold === "" ? null : Number(fold);
-        state.s2_reps = num("s2_reps");
-        state.s3_balance_sec = num("s3_balance_sec");
-        state.s4_recovery_sec = num("s4_recovery_sec");
-      }
-    },
-    {
-      id: "divergence",
-      title: "Round 2 — Divergence Sprint (Raw Range)",
-      desc: "5 minutes. List uses / meanings / metaphors. Speed > polish.",
-      timedSeconds: 5 * 60,
-      render: (state) => `
-        <div class="notice"><strong>Rules:</strong> One idea per line. Don’t censor. Keep moving.</div>
-
-        <label>Water — uses / meanings (one per line)</label>
-        <textarea id="r1_water" placeholder="e.g., currency, memory, cooling system, ritual...">${escapeHtml(state.r1_water || "")}</textarea>
-
-        <label>Rock — uses / meanings (one per line)</label>
-        <textarea id="r1_rock" placeholder="e.g., foundation, percussion, obstacle, signal...">${escapeHtml(state.r1_rock || "")}</textarea>
-
-        <label>Light — uses / meanings (one per line)</label>
-        <textarea id="r1_light" placeholder="e.g., navigation, truth, growth cue, encryption...">${escapeHtml(state.r1_light || "")}</textarea>
-
-        <div class="row">
-          <div>
-            <label>Category count (0–10+)</label>
-            <input id="r1_categories" type="number" min="0" max="20" value="${state.r1_categories ?? ""}" placeholder="e.g., 8" />
-            <div class="muted" style="font-size:12px;margin-top:6px;">
-              Examples: physical, emotional, scientific, cultural, symbolic, functional, narrative, systemic, philosophical…
-            </div>
-          </div>
-          <div>
-            <label>Most unusual idea (copy/paste one line)</label>
-            <input id="r1_unusual" type="text" value="${escapeHtml(state.r1_unusual || "")}" placeholder="e.g., Light as 'error-correcting code'"/>
-          </div>
-        </div>
-      `,
-      collect: (state) => {
-        state.r1_water = val("r1_water");
-        state.r1_rock = val("r1_rock");
-        state.r1_light = val("r1_light");
-        state.r1_categories = num("r1_categories");
-        state.r1_unusual = val("r1_unusual");
-      }
-    },
-    {
-      id: "forced_connection",
-      title: "Round 3 — Forced Connection Engine",
-      desc: "Connect three words into one idea. Then score it with the rubric.",
-      timedSeconds: 5 * 60,
-      render: (state) => `
-        <div class="notice"><strong>Your words:</strong> Ocean • Clock • Thread</div>
-        <label>Write a paragraph connecting all three</label>
-        <textarea id="r2_text" placeholder="Write 6–10 lines...">${escapeHtml(state.r2_text || "")}</textarea>
-
-        <div class="row">
-          <div>
-            <label>Coherence (1–5)</label>
-            <input id="r2_coherence" type="number" min="1" max="5" value="${state.r2_coherence ?? ""}" />
-          </div>
-          <div>
-            <label>Originality (1–5)</label>
-            <input id="r2_originality" type="number" min="1" max="5" value="${state.r2_originality ?? ""}" />
-          </div>
-          <div>
-            <label>Depth (1–5)</label>
-            <input id="r2_depth" type="number" min="1" max="5" value="${state.r2_depth ?? ""}" />
-          </div>
-        </div>
-
-        <div class="muted" style="font-size:12px;">
-          Rubric: Coherence = it makes sense; Originality = not cliché; Depth = layers, implications, metaphor, mechanism.
-        </div>
-      `,
-      collect: (state) => {
-        state.r2_text = val("r2_text");
-        state.r2_coherence = num("r2_coherence");
-        state.r2_originality = num("r2_originality");
-        state.r2_depth = num("r2_depth");
-      }
-    },
-    {
-      id: "perspective_shift",
-      title: "Round 4 — Perspective Shift Drill",
-      desc: "Argue both sides. 3 FOR and 3 AGAINST. Then score your balance + nuance.",
-      timedSeconds: 5 * 60,
-      render: (state) => `
-        <div class="notice"><strong>Claim:</strong> “Constraints increase creativity.”</div>
-
-        <label>FOR — 3 arguments (one per line)</label>
-        <textarea id="r3_for" placeholder="1) ...&#10;2) ...&#10;3) ...">${escapeHtml(state.r3_for || "")}</textarea>
-
-        <label>AGAINST — 3 arguments (one per line)</label>
-        <textarea id="r3_against" placeholder="1) ...&#10;2) ...&#10;3) ...">${escapeHtml(state.r3_against || "")}</textarea>
-
-        <div class="row">
-          <div>
-            <label>Symmetry (1–5)</label>
-            <input id="r3_symmetry" type="number" min="1" max="5" value="${state.r3_symmetry ?? ""}" />
-          </div>
-          <div>
-            <label>Nuance (1–5)</label>
-            <input id="r3_nuance" type="number" min="1" max="5" value="${state.r3_nuance ?? ""}" />
-          </div>
-          <div>
-            <label>Non-redundancy (1–5)</label>
-            <input id="r3_unique" type="number" min="1" max="5" value="${state.r3_unique ?? ""}" />
-          </div>
-        </div>
-      `,
-      collect: (state) => {
-        state.r3_for = val("r3_for");
-        state.r3_against = val("r3_against");
-        state.r3_symmetry = num("r3_symmetry");
-        state.r3_nuance = num("r3_nuance");
-        state.r3_unique = num("r3_unique");
-      }
-    },
-    {
-      id: "ambiguity",
-      title: "Round 5 — Ambiguity Field",
-      desc: "Answer a vague prompt. Then rate your comfort and your urge to resolve.",
-      timedSeconds: 4 * 60,
-      render: (state) => `
-        <div class="notice"><strong>Prompt:</strong> Gravity is half as strong tomorrow. What changes, and what new industries appear?</div>
-        <label>Your response</label>
-        <textarea id="r4_text" placeholder="Write freely...">${escapeHtml(state.r4_text || "")}</textarea>
-
-        <div class="row">
-          <div>
-            <label>Comfort in uncertainty (1–10)</label>
-            <input id="r4_comfort" type="number" min="1" max="10" value="${state.r4_comfort ?? ""}" />
-          </div>
-          <div>
-            <label>Urge to resolve quickly (1–10)</label>
-            <input id="r4_urge" type="number" min="1" max="10" value="${state.r4_urge ?? ""}" />
-          </div>
-        </div>
-      `,
-      collect: (state) => {
-        state.r4_text = val("r4_text");
-        state.r4_comfort = num("r4_comfort");
-        state.r4_urge = num("r4_urge");
-      }
-    },
-    {
-      id: "complexity",
-      title: "Round 6 — Complexity Handling",
-      desc: "Design a system. Score how many variables and feedback loops you included.",
-      timedSeconds: 6 * 60,
-      render: (state) => `
-        <div class="notice"><strong>Challenge:</strong> Design a system that helps a city reduce traffic without building new roads.</div>
-        <label>Your system sketch (text)</label>
-        <textarea id="r5_text" placeholder="Include constraints, incentives, feedback loops, unintended consequences...">${escapeHtml(state.r5_text || "")}</textarea>
-
-        <div class="row">
-          <div>
-            <label>Variables considered (0–20)</label>
-            <input id="r5_vars" type="number" min="0" max="50" value="${state.r5_vars ?? ""}" placeholder="e.g., 9" />
-          </div>
-          <div>
-            <label>Feedback loops / second-order effects (0–10)</label>
-            <input id="r5_loops" type="number" min="0" max="20" value="${state.r5_loops ?? ""}" placeholder="e.g., 3" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Clarity (1–5)</label>
-            <input id="r5_clarity" type="number" min="1" max="5" value="${state.r5_clarity ?? ""}" />
-          </div>
-          <div>
-            <label>Originality (1–5)</label>
-            <input id="r5_originality" type="number" min="1" max="5" value="${state.r5_originality ?? ""}" />
-          </div>
-          <div>
-            <label>Depth (1–5)</label>
-            <input id="r5_depth" type="number" min="1" max="5" value="${state.r5_depth ?? ""}" />
-          </div>
-        </div>
-      `,
-      collect: (state) => {
-        state.r5_text = val("r5_text");
-        state.r5_vars = num("r5_vars");
-        state.r5_loops = num("r5_loops");
-        state.r5_clarity = num("r5_clarity");
-        state.r5_originality = num("r5_originality");
-        state.r5_depth = num("r5_depth");
-      }
+    /* ---- Helpers ---- */
+    function val(id){ const el=document.getElementById(id); return el ? el.value.trim() : ""; }
+    function num(id){
+      const el=document.getElementById(id);
+      if(!el) return null;
+      const v = el.value === "" ? null : Number(el.value);
+      return Number.isFinite(v) ? v : null;
     }
-  ];
-
-  /* ---- App state ---- */
-  const state = {
-    attemptType: "baseline",
-    displayName: "",
-    startedAt: null,
-    finishedAt: null,
-    activeSeconds: 0,
-    roundIndex: 0,
-    timer: { running:false, endAt: null, intervalId: null },
-  };
-
-  /* ---- Charts State ---- */
-  let creativeChartInstance = null;
-  let somaticChartInstance = null;
-
-  function destroyCharts(){
-    if(creativeChartInstance){ creativeChartInstance.destroy(); creativeChartInstance = null; }
-    if(somaticChartInstance){ somaticChartInstance.destroy(); somaticChartInstance = null; }
-  }
-
-  /* ---- Chart polish helpers (darker = higher value) ---- */
-  function normalizeValues(values){
-    const nums = values.map(v => Number(v) || 0);
-    const min = Math.min(...nums);
-    const max = Math.max(...nums);
-    const span = max - min;
-    if(span <= 0) return nums.map(() => 0.5);
-    return nums.map(v => (v - min) / span);
-  }
-
-  function blackByValue(values){
-    const t = normalizeValues(values);
-    const lightLow = 62;
-    const lightHigh = 10;
-    return t.map(x => `hsl(0, 0%, ${Math.round(lightLow + (lightHigh - lightLow) * x)}%)`);
-  }
-
-  function blueByValue(values){
-    const t = normalizeValues(values);
-    const hue = 210;
-    const sat = 78;
-    const lightLow = 72;
-    const lightHigh = 26;
-    return t.map(x => `hsl(${hue}, ${sat}%, ${Math.round(lightLow + (lightHigh - lightLow) * x)}%)`);
-  }
-
-  function findMaxIndex(values){
-    let maxIdx = 0;
-    for(let i = 1; i < values.length; i++){
-      if((Number(values[i]) || 0) > (Number(values[maxIdx]) || 0)) maxIdx = i;
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
     }
-    return maxIdx;
-  }
+    function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+    function fmtTime(sec){
+      const m = Math.floor(sec/60);
+      const s = sec%60;
+      return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    }
 
-  function applyPolish(chart, rampFn){
-    const ds = chart.data.datasets[0];
-    const vals = ds.data.map(v => Number(v) || 0);
-    const colors = rampFn(vals);
-    const maxIdx = findMaxIndex(vals);
+    /* ---- Round definitions (Somatic first) ---- */
+    const ROUNDS = [
+      {
+        id: "somatic",
+        title: "Round 1 — Somatic Expansion (Body → Mind)",
+        desc: "No equipment. Self-timed. Enter results. Same protocol for Baseline + Post.",
+        timedSeconds: 0,
+        render: (state) => `
+          <div class="notice"><strong>Instructions:</strong> Do each test safely. Use a phone timer if needed. Enter honest results.</div>
 
-    const maxBoost = colors[maxIdx].startsWith("hsl(0, 0%")
-      ? "hsl(0, 0%, 6%)"
-      : "hsl(210, 82%, 22%)";
+          <h3 style="margin-top:10px;">Test 1 — Forward Fold Reach (0–20)</h3>
+          <label>Select your best match</label>
+          <select id="s1_fold">
+            <option value="">Select…</option>
+            <option value="0"  ${state.s1_fold==0  ? "selected":""}>0 — Hands above knees</option>
+            <option value="5"  ${state.s1_fold==5  ? "selected":""}>5 — Fingertips to shins</option>
+            <option value="10" ${state.s1_fold==10 ? "selected":""}>10 — Fingertips to ankles</option>
+            <option value="15" ${state.s1_fold==15 ? "selected":""}>15 — Touch toes</option>
+            <option value="20" ${state.s1_fold==20 ? "selected":""}>20 — Palms flat on floor</option>
+          </select>
 
-    ds.backgroundColor = colors;
-    ds.borderColor = colors.map((c, i) => (i === maxIdx ? maxBoost : c));
-    ds.borderWidth = vals.map((_, i) => (i === maxIdx ? 2 : 1));
-    ds.borderRadius = 6;
-    ds.borderSkipped = false;
-    ds.barPercentage = 0.78;
-    ds.categoryPercentage = 0.86;
-    ds.hoverBackgroundColor = colors.map((c, i) => (i === maxIdx ? maxBoost : c));
-    ds.hoverBorderWidth = vals.map((_, i) => (i === maxIdx ? 3 : 2));
-  }
+          <div class="hr"></div>
 
-  function renderCharts(attempt){
-    if(typeof window.Chart === "undefined") return;
+          <h3>Test 2 — Cross-Body Coordination (30 sec)</h3>
+          <p class="muted">Opposite elbow to knee, alternating, for 30 seconds. Count smooth reps.</p>
+          <label>Reps in 30 seconds</label>
+          <input id="s2_reps" type="number" min="0" max="200" value="${state.s2_reps ?? ""}" placeholder="e.g., 18" />
 
-    const creativeCanvas = byId("creativeChart");
-    const somaticCanvas = byId("somaticChart");
-    if(!creativeCanvas || !somaticCanvas) return;
+          <div class="hr"></div>
 
-    destroyCharts();
+          <h3>Test 3 — Balance (Eyes closed)</h3>
+          <p class="muted">Single leg, eyes closed. Time until you step/wobble out.</p>
+          <label>Seconds held</label>
+          <input id="s3_balance_sec" type="number" min="0" max="300" value="${state.s3_balance_sec ?? ""}" placeholder="e.g., 12" />
 
-    const creativeValues = [
-      attempt.scores.cei ?? 0,
-      attempt.scores.fluency ?? 0,
-      attempt.scores.flexibility ?? 0,
-      attempt.scores.associative ?? 0,
-      attempt.scores.perspective ?? 0,
-      attempt.scores.ambiguity ?? 0,
-      attempt.scores.complexity ?? 0
-    ];
+          <div class="hr"></div>
 
-    const somaticValues = [
-      attempt.scores.sei ?? 0,
-      attempt.scores.ees ?? 0,
-      attempt.scores.somatic_range ?? 0,
-      attempt.scores.somatic_recovery ?? 0,
-      attempt.scores.gap ?? 0
-    ];
-
-    const baseOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 260, easing: "easeOutQuart" },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          enabled: true,
-          displayColors: false,
-          callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.y}` }
+          <h3>Test 4 — Recovery (15 squats)</h3>
+          <p class="muted">Do 15 bodyweight squats. Time until your breathing feels calm again.</p>
+          <label>Seconds to calm breathing</label>
+          <input id="s4_recovery_sec" type="number" min="0" max="600" value="${state.s4_recovery_sec ?? ""}" placeholder="e.g., 55" />
+        `,
+        collect: (state) => {
+          const fold = document.getElementById("s1_fold")?.value;
+          state.s1_fold = fold === "" ? null : Number(fold);
+          state.s2_reps = num("s2_reps");
+          state.s3_balance_sec = num("s3_balance_sec");
+          state.s4_recovery_sec = num("s4_recovery_sec");
         }
       },
-      interaction: { mode: "nearest", intersect: false },
-      scales: {
-        y: { beginAtZero: true, max: 100, ticks: { maxTicksLimit: 5 } },
-        x: { ticks: { autoSkip: false, maxRotation: 25, minRotation: 25 } }
+      {
+        id: "divergence",
+        title: "Round 2 — Divergence Sprint (Raw Range)",
+        desc: "5 minutes. List uses / meanings / metaphors. Speed > polish.",
+        timedSeconds: 5 * 60,
+        render: (state) => `
+          <div class="notice"><strong>Rules:</strong> One idea per line. Don’t censor. Keep moving.</div>
+
+          <label>Water — uses / meanings (one per line)</label>
+          <textarea id="r1_water" placeholder="e.g., currency, memory, cooling system, ritual...">${escapeHtml(state.r1_water || "")}</textarea>
+
+          <label>Rock — uses / meanings (one per line)</label>
+          <textarea id="r1_rock" placeholder="e.g., foundation, percussion, obstacle, signal...">${escapeHtml(state.r1_rock || "")}</textarea>
+
+          <label>Light — uses / meanings (one per line)</label>
+          <textarea id="r1_light" placeholder="e.g., navigation, truth, growth cue, encryption...">${escapeHtml(state.r1_light || "")}</textarea>
+
+          <div class="row">
+            <div>
+              <label>Category count (0–10+)</label>
+              <input id="r1_categories" type="number" min="0" max="20" value="${state.r1_categories ?? ""}" placeholder="e.g., 8" />
+              <div class="muted" style="font-size:12px;margin-top:6px;">
+                Examples: physical, emotional, scientific, cultural, symbolic, functional, narrative, systemic, philosophical…
+              </div>
+            </div>
+            <div>
+              <label>Most unusual idea (copy/paste one line)</label>
+              <input id="r1_unusual" type="text" value="${escapeHtml(state.r1_unusual || "")}" placeholder="e.g., Light as 'error-correcting code'"/>
+            </div>
+          </div>
+        `,
+        collect: (state) => {
+          state.r1_water = val("r1_water");
+          state.r1_rock = val("r1_rock");
+          state.r1_light = val("r1_light");
+          state.r1_categories = num("r1_categories");
+          state.r1_unusual = val("r1_unusual");
+        }
+      },
+      {
+        id: "forced_connection",
+        title: "Round 3 — Forced Connection Engine",
+        desc: "Connect three words into one idea. Then score it with the rubric.",
+        timedSeconds: 5 * 60,
+        render: (state) => `
+          <div class="notice"><strong>Your words:</strong> Ocean • Clock • Thread</div>
+          <label>Write a paragraph connecting all three</label>
+          <textarea id="r2_text" placeholder="Write 6–10 lines...">${escapeHtml(state.r2_text || "")}</textarea>
+
+          <div class="row">
+            <div>
+              <label>Coherence (1–5)</label>
+              <input id="r2_coherence" type="number" min="1" max="5" value="${state.r2_coherence ?? ""}" />
+            </div>
+            <div>
+              <label>Originality (1–5)</label>
+              <input id="r2_originality" type="number" min="1" max="5" value="${state.r2_originality ?? ""}" />
+            </div>
+            <div>
+              <label>Depth (1–5)</label>
+              <input id="r2_depth" type="number" min="1" max="5" value="${state.r2_depth ?? ""}" />
+            </div>
+          </div>
+
+          <div class="muted" style="font-size:12px;">
+            Rubric: Coherence = it makes sense; Originality = not cliché; Depth = layers, implications, metaphor, mechanism.
+          </div>
+        `,
+        collect: (state) => {
+          state.r2_text = val("r2_text");
+          state.r2_coherence = num("r2_coherence");
+          state.r2_originality = num("r2_originality");
+          state.r2_depth = num("r2_depth");
+        }
+      },
+      {
+        id: "perspective_shift",
+        title: "Round 4 — Perspective Shift Drill",
+        desc: "Argue both sides. 3 FOR and 3 AGAINST. Then score your balance + nuance.",
+        timedSeconds: 5 * 60,
+        render: (state) => `
+          <div class="notice"><strong>Claim:</strong> “Constraints increase creativity.”</div>
+
+          <label>FOR — 3 arguments (one per line)</label>
+          <textarea id="r3_for" placeholder="1) ...&#10;2) ...&#10;3) ...">${escapeHtml(state.r3_for || "")}</textarea>
+
+          <label>AGAINST — 3 arguments (one per line)</label>
+          <textarea id="r3_against" placeholder="1) ...&#10;2) ...&#10;3) ...">${escapeHtml(state.r3_against || "")}</textarea>
+
+          <div class="row">
+            <div>
+              <label>Symmetry (1–5)</label>
+              <input id="r3_symmetry" type="number" min="1" max="5" value="${state.r3_symmetry ?? ""}" />
+            </div>
+            <div>
+              <label>Nuance (1–5)</label>
+              <input id="r3_nuance" type="number" min="1" max="5" value="${state.r3_nuance ?? ""}" />
+            </div>
+            <div>
+              <label>Non-redundancy (1–5)</label>
+              <input id="r3_unique" type="number" min="1" max="5" value="${state.r3_unique ?? ""}" />
+            </div>
+          </div>
+        `,
+        collect: (state) => {
+          state.r3_for = val("r3_for");
+          state.r3_against = val("r3_against");
+          state.r3_symmetry = num("r3_symmetry");
+          state.r3_nuance = num("r3_nuance");
+          state.r3_unique = num("r3_unique");
+        }
+      },
+      {
+        id: "ambiguity",
+        title: "Round 5 — Ambiguity Field",
+        desc: "Answer a vague prompt. Then rate your comfort and your urge to resolve.",
+        timedSeconds: 4 * 60,
+        render: (state) => `
+          <div class="notice"><strong>Prompt:</strong> Gravity is half as strong tomorrow. What changes, and what new industries appear?</div>
+          <label>Your response</label>
+          <textarea id="r4_text" placeholder="Write freely...">${escapeHtml(state.r4_text || "")}</textarea>
+
+          <div class="row">
+            <div>
+              <label>Comfort in uncertainty (1–10)</label>
+              <input id="r4_comfort" type="number" min="1" max="10" value="${state.r4_comfort ?? ""}" />
+            </div>
+            <div>
+              <label>Urge to resolve quickly (1–10)</label>
+              <input id="r4_urge" type="number" min="1" max="10" value="${state.r4_urge ?? ""}" />
+            </div>
+          </div>
+        `,
+        collect: (state) => {
+          state.r4_text = val("r4_text");
+          state.r4_comfort = num("r4_comfort");
+          state.r4_urge = num("r4_urge");
+        }
+      },
+      {
+        id: "complexity",
+        title: "Round 6 — Complexity Handling",
+        desc: "Design a system. Score how many variables and feedback loops you included.",
+        timedSeconds: 6 * 60,
+        render: (state) => `
+          <div class="notice"><strong>Challenge:</strong> Design a system that helps a city reduce traffic without building new roads.</div>
+          <label>Your system sketch (text)</label>
+          <textarea id="r5_text" placeholder="Include constraints, incentives, feedback loops, unintended consequences...">${escapeHtml(state.r5_text || "")}</textarea>
+
+          <div class="row">
+            <div>
+              <label>Variables considered (0–20)</label>
+              <input id="r5_vars" type="number" min="0" max="50" value="${state.r5_vars ?? ""}" placeholder="e.g., 9" />
+            </div>
+            <div>
+              <label>Feedback loops / second-order effects (0–10)</label>
+              <input id="r5_loops" type="number" min="0" max="20" value="${state.r5_loops ?? ""}" placeholder="e.g., 3" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Clarity (1–5)</label>
+              <input id="r5_clarity" type="number" min="1" max="5" value="${state.r5_clarity ?? ""}" />
+            </div>
+            <div>
+              <label>Originality (1–5)</label>
+              <input id="r5_originality" type="number" min="1" max="5" value="${state.r5_originality ?? ""}" />
+            </div>
+            <div>
+              <label>Depth (1–5)</label>
+              <input id="r5_depth" type="number" min="1" max="5" value="${state.r5_depth ?? ""}" />
+            </div>
+          </div>
+        `,
+        collect: (state) => {
+          state.r5_text = val("r5_text");
+          state.r5_vars = num("r5_vars");
+          state.r5_loops = num("r5_loops");
+          state.r5_clarity = num("r5_clarity");
+          state.r5_originality = num("r5_originality");
+          state.r5_depth = num("r5_depth");
+        }
       }
+    ];
+
+    /* ---- App state ---- */
+    const state = {
+      attemptType: "baseline",
+      displayName: "",
+      startedAt: null,
+      finishedAt: null,
+      activeSeconds: 0,
+      roundIndex: 0,
+      timer: { running:false, endAt: null, intervalId: null },
     };
 
-    somaticChartInstance = new Chart(somaticCanvas, {
-      type: "bar",
-      data: {
-        labels: ["Somatic Index","Embodied Expansion","Range","Recovery","Integration Gap"],
-        datasets: [{ label: "Somatic Scores", data: somaticValues }]
-      },
-      options: baseOptions
-    });
+    /* ---- DOM ---- */
+    const introCard = document.getElementById("introCard");
+    const labCard = document.getElementById("labCard");
+    const resultsCard = document.getElementById("resultsCard");
+    const roundTitle = document.getElementById("roundTitle");
+    const roundDesc = document.getElementById("roundDesc");
+    const roundBody = document.getElementById("roundBody");
+    const timerPill = document.getElementById("timerPill");
+    const progressBar = document.getElementById("progressBar");
+    const stepLabel = document.getElementById("stepLabel");
+    const modeLabel = document.getElementById("modeLabel");
+    const nextBtn = document.getElementById("nextBtn");
 
-    creativeChartInstance = new Chart(creativeCanvas, {
-      type: "bar",
-      data: {
-        labels: ["Creative Index","Fluency","Flexibility","Associative Strength","Perspective Shift","Ambiguity Tolerance","Complexity Handling"],
-        datasets: [{ label: "Creative Scores", data: creativeValues }]
-      },
-      options: baseOptions
-    });
+    /* ---- Charts State ---- */
+    let creativeChartInstance = null;
+    let somaticChartInstance = null;
 
-    const forcePolish = () => {
-      if(!somaticChartInstance || !creativeChartInstance) return;
-      applyPolish(somaticChartInstance, blackByValue);
-      applyPolish(creativeChartInstance, blueByValue);
-      somaticChartInstance.update();
-      creativeChartInstance.update();
-    };
-
-    forcePolish();
-    requestAnimationFrame(forcePolish);
-    setTimeout(forcePolish, 0);
-    setTimeout(forcePolish, 50);
-  }
-
-  /* ---- Persistence ---- */
-  function loadAttempts(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
+    function destroyCharts(){
+      if(creativeChartInstance){ creativeChartInstance.destroy(); creativeChartInstance = null; }
+      if(somaticChartInstance){ somaticChartInstance.destroy(); somaticChartInstance = null; }
     }
-  }
-  function saveAttempt(attempt){
-    const attempts = loadAttempts();
-    attempts.push(attempt);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(attempts));
-  }
 
-  /* ---- Timer (no auto-advance) ---- */
-  function startTimer(seconds, timerPill){
-    stopTimer();
-    if(!seconds || seconds <= 0){
-      timerPill.textContent = `Timer: 00:00`;
-      return;
+    /* ---- Chart polish helpers (darker = higher value) ---- */
+    function normalizeValues(values){
+      const nums = values.map(v => Number(v) || 0);
+      const min = Math.min(...nums);
+      const max = Math.max(...nums);
+      const span = max - min;
+      if(span <= 0) return nums.map(() => 0.5);
+      return nums.map(v => (v - min) / span);
     }
-    state.timer.running = true;
-    const now = Date.now();
-    state.timer.endAt = now + seconds*1000;
 
-    state.timer.intervalId = setInterval(() => {
-      const leftMs = state.timer.endAt - Date.now();
-      const left = Math.max(0, Math.ceil(leftMs/1000));
-      timerPill.textContent = `Timer: ${fmtTime(left)}`;
+    function blackByValue(values){
+      const t = normalizeValues(values);
+      const lightLow = 62;
+      const lightHigh = 10;
+      return t.map(x => `hsl(0, 0%, ${Math.round(lightLow + (lightHigh - lightLow) * x)}%)`);
+    }
 
-      if(left <= 0){
-        stopTimer();
-        timerPill.textContent = `Timer: 00:00`;
+    function blueByValue(values){
+      const t = normalizeValues(values);
+      const hue = 210;
+      const sat = 78;
+      const lightLow = 72;
+      const lightHigh = 26;
+      return t.map(x => `hsl(${hue}, ${sat}%, ${Math.round(lightLow + (lightHigh - lightLow) * x)}%)`);
+    }
+
+    function findMaxIndex(values){
+      let maxIdx = 0;
+      for(let i = 1; i < values.length; i++){
+        if((Number(values[i]) || 0) > (Number(values[maxIdx]) || 0)) maxIdx = i;
       }
-    }, 250);
-  }
-  function stopTimer(){
-    if(state.timer.intervalId) clearInterval(state.timer.intervalId);
-    state.timer.intervalId = null;
-    state.timer.running = false;
-  }
-
-  /* ---- Scoring ---- */
-  function splitIdeas(text){
-    return text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-  }
-  function scoreRound1Fluency(ideaCount){
-    if(ideaCount <= 10) return 5;
-    if(ideaCount <= 20) return 10;
-    if(ideaCount <= 35) return 15;
-    return 20;
-  }
-  function scoreRound1Flex(categories){
-    const c = clamp(categories ?? 0, 0, 20);
-    if(c <= 3) return 5;
-    if(c <= 6) return 10;
-    if(c <= 8) return 15;
-    return 20;
-  }
-  function scoreRubric5(a,b,c){
-    const A = clamp(a ?? 1, 1, 5);
-    const B = clamp(b ?? 1, 1, 5);
-    const C = clamp(c ?? 1, 1, 5);
-    const sum = A+B+C;
-    const norm = (sum - 3) / 12;
-    return Math.round(norm * 20);
-  }
-  function scoreAmbiguity(comfort, urge){
-    const c = clamp(comfort ?? 1, 1, 10);
-    const u = clamp(urge ?? 10, 1, 10);
-    const urgeRev = 11 - u;
-    const avg = (c + urgeRev) / 2;
-    return Math.round(((avg - 1) / 9) * 20);
-  }
-  function scoreComplexity(vars, loops, clarity, originality, depth){
-    const v = clamp(vars ?? 0, 0, 20);
-    const l = clamp(loops ?? 0, 0, 10);
-    const vScore = (v / 20) * 10;
-    const lScore = (l / 10) * 5;
-    const rScore = (clamp(clarity ?? 1,1,5) + clamp(originality ?? 1,1,5) + clamp(depth ?? 1,1,5) - 3) / 12 * 5;
-    return Math.round(clamp(vScore + lScore + rScore, 0, 20));
-  }
-  function scorePerspective(symmetry, nuance, unique){
-    return scoreRubric5(symmetry, nuance, unique);
-  }
-
-  /* ---- Somatic scoring ---- */
-  function scoreCoordination(reps){
-    const r = clamp(reps ?? 0, 0, 200);
-    if(r <= 10) return 5;
-    if(r <= 20) return 10;
-    if(r <= 30) return 15;
-    return 20;
-  }
-  function scoreBalance(seconds){
-    const s = clamp(seconds ?? 0, 0, 300);
-    if(s <= 5) return 5;
-    if(s <= 15) return 10;
-    if(s <= 25) return 15;
-    return 20;
-  }
-  function scoreRecovery(seconds){
-    const s = clamp(seconds ?? 999, 0, 999);
-    if(s > 90) return 5;
-    if(s >= 60) return 10;
-    if(s >= 30) return 15;
-    return 20;
-  }
-  function scoreSomaticIndex(foldScore, reps, balanceSec, recoverySec){
-    const range = clamp(foldScore ?? 0, 0, 20);
-    const coordination = scoreCoordination(reps);
-    const balance = scoreBalance(balanceSec);
-    const recovery = scoreRecovery(recoverySec);
-
-    const total80 = range + coordination + balance + recovery;
-    const sei = Math.round((total80 / 80) * 100);
-    return { sei, range, coordination, balance, recovery, total80 };
-  }
-
-  /* ---- Utils ---- */
-  function cryptoRandomId(){
-    if(window.crypto && crypto.getRandomValues){
-      const buf = new Uint32Array(4);
-      crypto.getRandomValues(buf);
-      return [...buf].map(x => x.toString(16)).join("-");
+      return maxIdx;
     }
-    return String(Math.random()).slice(2) + "-" + String(Date.now());
-  }
 
-  /* ---- App UI Wiring ---- */
-  document.addEventListener("DOMContentLoaded", () => {
-    const introCard = byId("introCard");
-    const labCard = byId("labCard");
-    const resultsCard = byId("resultsCard");
+    function applyPolish(chart, rampFn){
+      const ds = chart.data.datasets[0];
+      const vals = ds.data.map(v => Number(v) || 0);
+      const colors = rampFn(vals);
+      const maxIdx = findMaxIndex(vals);
 
-    const roundTitle = byId("roundTitle");
-    const roundDesc = byId("roundDesc");
-    const roundBody = byId("roundBody");
+      const maxBoost = colors[maxIdx].startsWith("hsl(0, 0%")
+        ? "hsl(0, 0%, 6%)"
+        : "hsl(210, 82%, 22%)";
 
-    const timerPill = byId("timerPill");
-    const progressBar = byId("progressBar");
-    const stepLabel = byId("stepLabel");
-    const modeLabel = byId("modeLabel");
-    const nextBtn = byId("nextBtn");
+      ds.backgroundColor = colors;
+      ds.borderColor = colors.map((c, i) => (i === maxIdx ? maxBoost : c));
+      ds.borderWidth = vals.map((_, i) => (i === maxIdx ? 2 : 1));
+      ds.borderRadius = 6;
+      ds.borderSkipped = false;
+      ds.barPercentage = 0.78;
+      ds.categoryPercentage = 0.86;
+      ds.hoverBackgroundColor = colors.map((c, i) => (i === maxIdx ? maxBoost : c));
+      ds.hoverBorderWidth = vals.map((_, i) => (i === maxIdx ? 3 : 2));
+    }
+
+    function renderCharts(attempt){
+      if(typeof window.Chart === "undefined") return;
+
+      const creativeCanvas = document.getElementById("creativeChart");
+      const somaticCanvas = document.getElementById("somaticChart");
+      if(!creativeCanvas || !somaticCanvas) return;
+
+      destroyCharts();
+
+      const creativeValues = [
+        attempt.scores.cei ?? 0,
+        attempt.scores.fluency ?? 0,
+        attempt.scores.flexibility ?? 0,
+        attempt.scores.associative ?? 0,
+        attempt.scores.perspective ?? 0,
+        attempt.scores.ambiguity ?? 0,
+        attempt.scores.complexity ?? 0
+      ];
+
+      const somaticValues = [
+        attempt.scores.sei ?? 0,
+        attempt.scores.ees ?? 0,
+        attempt.scores.somatic_range ?? 0,
+        attempt.scores.somatic_recovery ?? 0,
+        attempt.scores.gap ?? 0
+      ];
+
+      const baseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 260, easing: "easeOutQuart" },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            displayColors: false,
+            callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed.y}` }
+          }
+        },
+        interaction: { mode: "nearest", intersect: false },
+        scales: {
+          y: { beginAtZero: true, max: 100, ticks: { maxTicksLimit: 5 } },
+          x: { ticks: { autoSkip: false, maxRotation: 25, minRotation: 25 } }
+        }
+      };
+
+      somaticChartInstance = new Chart(somaticCanvas, {
+        type: "bar",
+        data: {
+          labels: ["Somatic Index","Embodied Expansion","Range","Recovery","Integration Gap"],
+          datasets: [{ label: "Somatic Scores", data: somaticValues }]
+        },
+        options: baseOptions
+      });
+
+      creativeChartInstance = new Chart(creativeCanvas, {
+        type: "bar",
+        data: {
+          labels: ["Creative Index","Fluency","Flexibility","Associative Strength","Perspective Shift","Ambiguity Tolerance","Complexity Handling"],
+          datasets: [{ label: "Creative Scores", data: creativeValues }]
+        },
+        options: baseOptions
+      });
+
+      const forcePolish = () => {
+        if(!somaticChartInstance || !creativeChartInstance) return;
+        applyPolish(somaticChartInstance, blackByValue);
+        applyPolish(creativeChartInstance, blueByValue);
+        somaticChartInstance.update();
+        creativeChartInstance.update();
+      };
+
+      forcePolish();
+      requestAnimationFrame(forcePolish);
+      setTimeout(forcePolish, 0);
+      setTimeout(forcePolish, 50);
+    }
 
     /* ---- Bulletproof: Next can NEVER be disabled (no loops) ---- */
     function unlockNext(){
@@ -585,6 +451,37 @@
       progressBar.style.width = `${Math.round((step/totalSteps)*100)}%`;
       stepLabel.textContent = `Round ${state.roundIndex+1} of ${ROUNDS.length}`;
       modeLabel.textContent = `Mode: ${state.attemptType === "baseline" ? "Baseline" : "Post"}`;
+    }
+
+    /* ---- Timer (no auto-advance) ---- */
+    function startTimer(seconds){
+      stopTimer();
+
+      if(!seconds || seconds <= 0){
+        timerPill.textContent = `Timer: 00:00`;
+        return;
+      }
+
+      state.timer.running = true;
+      const now = Date.now();
+      state.timer.endAt = now + seconds*1000;
+
+      state.timer.intervalId = setInterval(() => {
+        const leftMs = state.timer.endAt - Date.now();
+        const left = Math.max(0, Math.ceil(leftMs/1000));
+        timerPill.textContent = `Timer: ${fmtTime(left)}`;
+
+        if(left <= 0){
+          stopTimer();
+          timerPill.textContent = `Timer: 00:00`;
+        }
+      }, 250);
+    }
+
+    function stopTimer(){
+      if(state.timer.intervalId) clearInterval(state.timer.intervalId);
+      state.timer.intervalId = null;
+      state.timer.running = false;
     }
 
     /* ---- Navigation ---- */
@@ -614,27 +511,27 @@
       resultsCard.style.display = "block";
 
       /* Visible totals (2 cards) */
-      byId("seiTotalN").textContent = attempt.scores.sei ?? "—";
-      byId("ceiTotalN").textContent = attempt.scores.cei ?? "—";
+      document.getElementById("seiTotalN").textContent = attempt.scores.sei ?? "—";
+      document.getElementById("ceiTotalN").textContent = attempt.scores.cei ?? "—";
 
       /* Legacy KPI values (kept for future UI; hidden now) */
-      byId("ceiN").textContent = attempt.scores.cei ?? "—";
-      byId("fluencyN").textContent = attempt.scores.fluency ?? "—";
-      byId("flexN").textContent = attempt.scores.flexibility ?? "—";
-      byId("assocN").textContent = attempt.scores.associative ?? "—";
-      byId("shiftN").textContent = attempt.scores.perspective ?? "—";
-      byId("ambN").textContent = attempt.scores.ambiguity ?? "—";
-      byId("complexN").textContent = attempt.scores.complexity ?? "—";
+      document.getElementById("ceiN").textContent = attempt.scores.cei ?? "—";
+      document.getElementById("fluencyN").textContent = attempt.scores.fluency ?? "—";
+      document.getElementById("flexN").textContent = attempt.scores.flexibility ?? "—";
+      document.getElementById("assocN").textContent = attempt.scores.associative ?? "—";
+      document.getElementById("shiftN").textContent = attempt.scores.perspective ?? "—";
+      document.getElementById("ambN").textContent = attempt.scores.ambiguity ?? "—";
+      document.getElementById("complexN").textContent = attempt.scores.complexity ?? "—";
 
-      byId("totalIdeasN").textContent = attempt.scores.ideaCount ?? "—";
-      byId("catsN").textContent = attempt.scores.categoryCount ?? "—";
-      byId("timeN").textContent = fmtTime(attempt.meta.activeSeconds ?? 0);
+      document.getElementById("totalIdeasN").textContent = attempt.scores.ideaCount ?? "—";
+      document.getElementById("catsN").textContent = attempt.scores.categoryCount ?? "—";
+      document.getElementById("timeN").textContent = fmtTime(attempt.meta.activeSeconds ?? 0);
 
-      byId("seiN").textContent = attempt.scores.sei ?? "—";
-      byId("eesN").textContent = attempt.scores.ees ?? "—";
-      byId("gapN").textContent = attempt.scores.gap ?? "—";
-      byId("rangeN").textContent = attempt.scores.somatic_range ?? "—";
-      byId("recoveryN").textContent = attempt.scores.somatic_recovery ?? "—";
+      document.getElementById("seiN").textContent = attempt.scores.sei ?? "—";
+      document.getElementById("eesN").textContent = attempt.scores.ees ?? "—";
+      document.getElementById("gapN").textContent = attempt.scores.gap ?? "—";
+      document.getElementById("rangeN").textContent = attempt.scores.somatic_range ?? "—";
+      document.getElementById("recoveryN").textContent = attempt.scores.somatic_recovery ?? "—";
 
       renderComparison(attempt);
 
@@ -642,26 +539,10 @@
       requestAnimationFrame(() => renderCharts(attempt));
     }
 
-    /* ---- Render ---- */
-    function renderRound(){
-      stopTimer();
-      setProgress();
-
-      const round = ROUNDS[state.roundIndex];
-      roundTitle.textContent = round.title;
-      roundDesc.textContent = round.desc;
-      roundBody.innerHTML = round.render(state);
-
-      unlockNext();
-
-      timerPill.textContent = `Timer: ${fmtTime(round.timedSeconds || 0)}`;
-      startTimer(round.timedSeconds || 0, timerPill);
-    }
-
     /* ---- Start / Reset ---- */
     function startLab(){
-      state.attemptType = byId("attemptType").value;
-      state.displayName = byId("displayName").value.trim();
+      state.attemptType = document.getElementById("attemptType").value;
+      state.displayName = document.getElementById("displayName").value.trim();
       state.startedAt = new Date().toISOString();
       state.finishedAt = null;
       state.activeSeconds = 0;
@@ -709,7 +590,99 @@
       }
     }
 
-    /* ---- Finish + Score ---- */
+    /* ---- Render ---- */
+    function renderRound(){
+      stopTimer();
+      setProgress();
+
+      const round = ROUNDS[state.roundIndex];
+      roundTitle.textContent = round.title;
+      roundDesc.textContent = round.desc;
+      roundBody.innerHTML = round.render(state);
+
+      unlockNext();
+
+      timerPill.textContent = `Timer: ${fmtTime(round.timedSeconds || 0)}`;
+      startTimer(round.timedSeconds || 0);
+    }
+
+    /* ---- Scoring ---- */
+    function splitIdeas(text){
+      return text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    }
+    function scoreRound1Fluency(ideaCount){
+      if(ideaCount <= 10) return 5;
+      if(ideaCount <= 20) return 10;
+      if(ideaCount <= 35) return 15;
+      return 20;
+    }
+    function scoreRound1Flex(categories){
+      const c = clamp(categories ?? 0, 0, 20);
+      if(c <= 3) return 5;
+      if(c <= 6) return 10;
+      if(c <= 8) return 15;
+      return 20;
+    }
+    function scoreRubric5(a,b,c){
+      const A = clamp(a ?? 1, 1, 5);
+      const B = clamp(b ?? 1, 1, 5);
+      const C = clamp(c ?? 1, 1, 5);
+      const sum = A+B+C;
+      const norm = (sum - 3) / 12;
+      return Math.round(norm * 20);
+    }
+    function scoreAmbiguity(comfort, urge){
+      const c = clamp(comfort ?? 1, 1, 10);
+      const u = clamp(urge ?? 10, 1, 10);
+      const urgeRev = 11 - u;
+      const avg = (c + urgeRev) / 2;
+      return Math.round(((avg - 1) / 9) * 20);
+    }
+    function scoreComplexity(vars, loops, clarity, originality, depth){
+      const v = clamp(vars ?? 0, 0, 20);
+      const l = clamp(loops ?? 0, 0, 10);
+      const vScore = (v / 20) * 10;
+      const lScore = (l / 10) * 5;
+      const rScore = (clamp(clarity ?? 1,1,5) + clamp(originality ?? 1,1,5) + clamp(depth ?? 1,1,5) - 3) / 12 * 5;
+      return Math.round(clamp(vScore + lScore + rScore, 0, 20));
+    }
+    function scorePerspective(symmetry, nuance, unique){
+      return scoreRubric5(symmetry, nuance, unique);
+    }
+
+    /* ---- Somatic scoring ---- */
+    function scoreCoordination(reps){
+      const r = clamp(reps ?? 0, 0, 200);
+      if(r <= 10) return 5;
+      if(r <= 20) return 10;
+      if(r <= 30) return 15;
+      return 20;
+    }
+    function scoreBalance(seconds){
+      const s = clamp(seconds ?? 0, 0, 300);
+      if(s <= 5) return 5;
+      if(s <= 15) return 10;
+      if(s <= 25) return 15;
+      return 20;
+    }
+    function scoreRecovery(seconds){
+      const s = clamp(seconds ?? 999, 0, 999);
+      if(s > 90) return 5;
+      if(s >= 60) return 10;
+      if(s >= 30) return 15;
+      return 20;
+    }
+    function scoreSomaticIndex(foldScore, reps, balanceSec, recoverySec){
+      const range = clamp(foldScore ?? 0, 0, 20);
+      const coordination = scoreCoordination(reps);
+      const balance = scoreBalance(balanceSec);
+      const recovery = scoreRecovery(recoverySec);
+
+      const total80 = range + coordination + balance + recovery;
+      const sei = Math.round((total80 / 80) * 100);
+      return { sei, range, coordination, balance, recovery, total80 };
+    }
+
     function finishAndScore(){
       stopTimer();
       state.finishedAt = new Date().toISOString();
@@ -775,7 +748,24 @@
       showResults(attempt);
     }
 
-    /* ---- Stored Results ---- */
+    /* ---- Persistence ---- */
+    function loadAttempts(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveAttempt(attempt){
+      const attempts = loadAttempts();
+      attempts.push(attempt);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(attempts));
+    }
+
     function showStoredResults(){
       const attempts = loadAttempts();
       if(attempts.length === 0){
@@ -785,13 +775,12 @@
       showResults(attempts[attempts.length - 1]);
     }
 
-    /* ---- Comparison (FIXED: no forced white background) ---- */
     function renderComparison(current){
       const attempts = loadAttempts();
       const baseline = [...attempts].reverse().find(a => a.meta.attemptType === "baseline");
       const post = [...attempts].reverse().find(a => a.meta.attemptType === "post");
 
-      const el = byId("comparisonBlock");
+      const el = document.getElementById("comparisonBlock");
       if(!baseline || !post){
         el.innerHTML = `
           <div class="notice"><strong>Comparison:</strong> Take both a Baseline and a Post attempt on this device to see before/after deltas.</div>
@@ -817,19 +806,19 @@
             <table style="width:100%; border-collapse:collapse; font-size:14px;">
               <thead>
                 <tr>
-                  <th style="text-align:left; padding:10px; border-bottom:1px solid var(--line);">Metric</th>
-                  <th style="text-align:right; padding:10px; border-bottom:1px solid var(--line);">Baseline</th>
-                  <th style="text-align:right; padding:10px; border-bottom:1px solid var(--line);">Post</th>
-                  <th style="text-align:right; padding:10px; border-bottom:1px solid var(--line);">Δ</th>
+                  <th style="text-align:left; padding:10px;">Metric</th>
+                  <th style="text-align:right; padding:10px;">Baseline</th>
+                  <th style="text-align:right; padding:10px;">Post</th>
+                  <th style="text-align:right; padding:10px;">Δ</th>
                 </tr>
               </thead>
               <tbody>
                 ${rows.map(([k,b,p]) => `
                   <tr>
-                    <td style="padding:10px; border-bottom:1px solid var(--line);">${k}</td>
-                    <td style="padding:10px; text-align:right; border-bottom:1px solid var(--line);">${b ?? "—"}</td>
-                    <td style="padding:10px; text-align:right; border-bottom:1px solid var(--line);">${p ?? "—"}</td>
-                    <td style="padding:10px; text-align:right; border-bottom:1px solid var(--line);">${Number.isFinite(p-b) ? ((p-b)>=0?"+":"") + (p-b) : "—"}</td>
+                    <td style="padding:10px;">${k}</td>
+                    <td style="padding:10px; text-align:right;">${b ?? "—"}</td>
+                    <td style="padding:10px; text-align:right;">${p ?? "—"}</td>
+                    <td style="padding:10px; text-align:right;">${Number.isFinite(p-b) ? ((p-b)>=0?"+":"") + (p-b) : "—"}</td>
                   </tr>
                 `).join("")}
               </tbody>
@@ -867,18 +856,27 @@
       URL.revokeObjectURL(url);
     }
 
+    /* ---- Utils ---- */
+    function cryptoRandomId(){
+      if(window.crypto && crypto.getRandomValues){
+        const buf = new Uint32Array(4);
+        crypto.getRandomValues(buf);
+        return [...buf].map(x => x.toString(16)).join("-");
+      }
+      return String(Math.random()).slice(2) + "-" + String(Date.now());
+    }
+
     /* ---- Bind buttons ONCE ---- */
-    byId("startBtn").onclick = startLab;
-    byId("viewResultsBtn").onclick = showStoredResults;
-    byId("backBtn").onclick = prevRound;
+    document.getElementById("startBtn").onclick = startLab;
+    document.getElementById("viewResultsBtn").onclick = showStoredResults;
+    document.getElementById("backBtn").onclick = prevRound;
     nextBtn.onclick = () => { unlockNext(); nextRound(); };
-    byId("retakeBtn").onclick = () => { resetAttempt(false); showIntro(); };
-    byId("backHomeBtn").onclick = showIntro;
-    byId("exportBtn").onclick = exportCSV;
-    byId("resetAllBtn").onclick = resetAll;
+    document.getElementById("retakeBtn").onclick = () => { resetAttempt(false); showIntro(); };
+    document.getElementById("backHomeBtn").onclick = showIntro;
+    document.getElementById("exportBtn").onclick = exportCSV;
+    document.getElementById("resetAllBtn").onclick = resetAll;
 
     /* ---- Init ---- */
     showIntro();
   });
-
 })();
