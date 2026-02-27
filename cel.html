@@ -188,6 +188,30 @@
       .chart-canvas{ height: 280px; }
       .totals{ grid-template-columns: 1fr; }
     }
+
+    /* ---- Header button polish ---- */
+    header .btn-outline{
+      min-width: 104px;          /* all same width */
+      height: 42px;              /* all same height */
+      padding: 10px 14px;        /* consistent */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background-color .12s ease, border-color .12s ease, transform .08s ease;
+    }
+
+    /* hover / pressed feedback */
+    header .btn-outline:hover{
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.35);
+    }
+
+    /* click feedback (instant “pressed” feel) */
+    header .btn-outline:active{
+      transform: translateY(1px);
+      background: rgba(255,255,255,.18);
+    }
   </style>
 </head>
 
