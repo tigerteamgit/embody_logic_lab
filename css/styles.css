@@ -1,87 +1,88 @@
-/* ---- Creative Expansion Lab: style.css ---- */
+/* ---- Creative Expansion Lab: styles.css ---- */
 /* Build stamp (change this line to force a visible diff in commits): 2026-02-27-01 */
+
+/* ---- Fonts ---- */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap");
 
 /* ---- Base ---- */
 :root{
-  /* ---- Cyber palette ---- */
-  --bg:#070a0f;
-  --bg2:#05070c;
-  --paper:#0c121b;     /* cards are now dark “glass” */
-  --ink:#e9f2ff;       /* light text on cards */
-  --muted: rgba(233,242,255,.62);
-  --line: rgba(140,190,255,.16);
+  /* Surfaces */
+  --bg0:#05070b;
+  --bg1:#070b12;
+  --bg2:#0a0f1a;
 
-  --accent:#00e5ff;    /* cyan */
-  --accent2:#8a5bff;   /* violet */
-  --accent3:#00ff9a;   /* green */
-  --soft: rgba(255,255,255,.06);
+  /* Ink */
+  --ink:#eaf0ff;
+  --muted:rgba(234,240,255,.72);
+  --faint:rgba(234,240,255,.52);
 
-  --good:#00ff9a;
-  --warn:#ffcc00;
-  --bad:#ff3b5c;
+  /* Chrome + neon */
+  --chrome1: rgba(255,255,255,.10);
+  --chrome2: rgba(255,255,255,.06);
+  --chrome3: rgba(255,255,255,.14);
+  --edge: rgba(170,200,255,.18);
 
-  --radius:14px;
-  --shadow: 0 18px 45px rgba(0,0,0,.55);
-  --max: 860px;
+  --cyan: #35d6ff;
+  --violet:#8a5cff;
+  --mint:  #25ffb6;
+  --amber: #ffbd3a;
+  --red:   #ff3b4d;
+
+  --radius: 16px;
+  --shadow: 0 22px 60px rgba(0,0,0,.55);
+  --max: 980px;
 
   /* ---- Chart sizing ---- */
-  --chart-h: 320px;        /* default chart height */
-  --chart-h-mobile: 320px; /* mobile chart height */
-
-  /* ---- Cyber UI primitives ---- */
-  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --scanline: repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,.06) 0px,
-    rgba(255,255,255,.06) 1px,
-    rgba(0,0,0,0) 2px,
-    rgba(0,0,0,0) 5px
-  );
+  --chart-h: 320px;
+  --chart-h-mobile: 320px;
 }
 
 *{ box-sizing:border-box; }
-
 html, body{ height:100%; }
 
 body{
   margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--ink);
 
-  /* ---- Scientific/cyber lab background ---- */
+  /* cyber backdrop */
   background:
-    radial-gradient(900px 520px at 18% 12%, rgba(0,229,255,.16), rgba(0,0,0,0) 60%),
-    radial-gradient(760px 520px at 80% 24%, rgba(138,91,255,.18), rgba(0,0,0,0) 58%),
-    radial-gradient(900px 620px at 50% 100%, rgba(0,255,154,.10), rgba(0,0,0,0) 60%),
-    linear-gradient(180deg, var(--bg2), var(--bg));
-  color:#eaf2ff;
-
-  position: relative;
-  overflow-x: hidden;
+    radial-gradient(1200px 700px at 70% -10%, rgba(53,214,255,.18), transparent 60%),
+    radial-gradient(1000px 650px at 10% 10%, rgba(138,92,255,.18), transparent 60%),
+    radial-gradient(900px 600px at 60% 110%, rgba(37,255,182,.10), transparent 55%),
+    linear-gradient(180deg, var(--bg2), var(--bg0));
+  overflow-x:hidden;
 }
 
-/* Grid overlay + scanlines for “lab display” feel */
+/* subtle grid */
 body::before{
   content:"";
-  position: fixed;
-  inset: 0;
+  position:fixed;
+  inset:0;
   pointer-events:none;
+  opacity:.35;
   background:
-    linear-gradient(to right, rgba(140,190,255,.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(140,190,255,.05) 1px, transparent 1px),
-    var(--scanline);
-  background-size: 44px 44px, 44px 44px, auto;
-  mix-blend-mode: screen;
-  opacity: .22;
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 50% 20%, rgba(0,0,0,1), rgba(0,0,0,.25) 60%, rgba(0,0,0,0) 85%);
 }
 
-/* Subtle vignette */
+/* scanline */
 body::after{
   content:"";
-  position: fixed;
-  inset: 0;
+  position:fixed;
+  inset:0;
   pointer-events:none;
-  background: radial-gradient(circle at 50% 30%, rgba(0,0,0,0) 40%, rgba(0,0,0,.55) 100%);
-  opacity: .55;
+  opacity:.08;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,.45) 0px,
+    rgba(255,255,255,.45) 1px,
+    transparent 2px,
+    transparent 6px
+  );
+  mix-blend-mode: overlay;
 }
 
 /* ---- Header ---- */
@@ -89,10 +90,11 @@ header{
   position: sticky;
   top:0;
   z-index:10;
-  backdrop-filter: blur(12px);
 
-  background: rgba(6,10,16,.72);
-  border-bottom: 1px solid rgba(0,229,255,.14);
+  backdrop-filter: blur(14px);
+  background:
+    linear-gradient(180deg, rgba(10,14,24,.85), rgba(10,14,24,.55));
+  border-bottom: 1px solid rgba(150,190,255,.14);
   box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
 
@@ -106,94 +108,94 @@ header{
   gap:12px;
 }
 
-.title{ display:flex; flex-direction:column; gap:2px; }
+.title{ display:flex; flex-direction:column; gap:3px; }
 .title strong{
-  font-size: 15px;
-  letter-spacing:.8px;
+  font-family: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 16px;
+  letter-spacing: .9px;
   text-transform: uppercase;
-  font-family: var(--mono);
-  color: rgba(233,242,255,.95);
 }
 .title span{
   font-size: 12px;
-  color: rgba(0,229,255,.70);
-  letter-spacing:.3px;
-  font-family: var(--mono);
+  color: rgba(234,240,255,.65);
 }
 
 /* ---- Pills ---- */
 .pill{
   font-size:12px;
-  padding:6px 10px;
-  border:1px solid rgba(0,229,255,.22);
+  padding:7px 11px;
   border-radius: 999px;
-  color: rgba(233,242,255,.90);
-  background: rgba(255,255,255,.05);
   white-space:nowrap;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.18) inset;
+
+  color: rgba(234,240,255,.92);
+  border: 1px solid rgba(170,200,255,.20);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 10px 22px rgba(0,0,0,.25);
 }
 
 .timer{
   font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  color: rgba(233,242,255,.95);
-  font-family: var(--mono);
+  font-family: "Share Tech Mono", ui-monospace, monospace;
   letter-spacing:.2px;
 }
 
 /* ---- Main Layout ---- */
 main{
   max-width: var(--max);
-  margin: 18px auto 80px;
+  margin: 18px auto 90px;
   padding: 0 16px;
 }
 
-/* ---- Cards ---- */
+/* ---- Cards (glass + chrome) ---- */
 .card{
-  background:
-    radial-gradient(420px 220px at 15% 10%, rgba(0,229,255,.10), rgba(0,0,0,0) 60%),
-    radial-gradient(360px 240px at 85% 0%, rgba(138,91,255,.10), rgba(0,0,0,0) 55%),
-    rgba(12,18,27,.88);
-
-  color: var(--ink);
+  position:relative;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px;
+  padding: 20px;
   margin: 14px 0;
 
-  border: 1px solid rgba(0,229,255,.14);
-  position: relative;
-  overflow: hidden;
+  color: var(--ink);
+  background:
+    radial-gradient(900px 300px at 30% 0%, rgba(53,214,255,.10), transparent 55%),
+    radial-gradient(700px 280px at 80% 15%, rgba(138,92,255,.12), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+  border: 1px solid rgba(170,200,255,.18);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
 }
 
-/* card “circuit” edge glow */
 .card::before{
   content:"";
   position:absolute;
-  inset: -1px;
+  inset:-1px;
   border-radius: calc(var(--radius) + 1px);
-  background:
-    conic-gradient(from 90deg,
-      rgba(0,229,255,.0),
-      rgba(0,229,255,.28),
-      rgba(138,91,255,.22),
-      rgba(0,255,154,.22),
-      rgba(0,229,255,.0)
-    );
-  filter: blur(18px);
-  opacity: .35;
   pointer-events:none;
+  background: conic-gradient(
+    from 180deg,
+    rgba(53,214,255,.0),
+    rgba(53,214,255,.20),
+    rgba(138,92,255,.18),
+    rgba(37,255,182,.14),
+    rgba(53,214,255,.0)
+  );
+  filter: blur(18px);
+  opacity:.45;
+  z-index:-1;
 }
 
 .card h1, .card h2, .card h3{
   margin: 0 0 10px;
-  letter-spacing:.3px;
-}
-.card h1, .card h2{
-  font-family: var(--mono);
+  font-family: "Share Tech Mono", ui-monospace, monospace;
+  letter-spacing:.6px;
   text-transform: uppercase;
-  letter-spacing: 1px;
 }
+
+.card h1{ font-size: 34px; line-height: 1.1; }
+.card h2{ font-size: 20px; }
+.card h3{ font-size: 15px; }
+
 .muted{ color: var(--muted); }
 
 /* ---- Form Layout ---- */
@@ -206,42 +208,37 @@ main{
 
 label{
   font-size:12px;
-  color: rgba(233,242,255,.78);
+  color: rgba(234,240,255,.78);
   display:block;
   margin:10px 0 6px;
-  letter-spacing:.6px;
+  letter-spacing:.25px;
   text-transform: uppercase;
-  font-family: var(--mono);
+  font-family: "Share Tech Mono", ui-monospace, monospace;
 }
 
+/* Inputs: dark chrome */
 input[type="text"], input[type="number"], textarea, select{
   width:100%;
   padding: 12px 12px;
   border-radius: 12px;
-
-  border: 1px solid rgba(140,190,255,.20);
-  background: rgba(4,8,14,.65);
-  color: rgba(233,242,255,.95);
-
+  border: 1px solid rgba(170,200,255,.18);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.22));
+  color: var(--ink);
   outline:none;
-  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .08s ease;
 }
 
-input[type="text"]::placeholder,
-input[type="number"]::placeholder,
-textarea::placeholder{
-  color: rgba(233,242,255,.45);
-}
+input::placeholder, textarea::placeholder{ color: rgba(234,240,255,.38); }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus,
 select:focus{
-  border-color: rgba(0,229,255,.55);
+  border-color: rgba(53,214,255,.55);
   box-shadow:
-    0 0 0 3px rgba(0,229,255,.14),
-    0 0 22px rgba(0,229,255,.12);
-  background: rgba(4,8,14,.78);
+    0 0 0 3px rgba(53,214,255,.14),
+    0 14px 30px rgba(0,0,0,.28);
 }
 
 textarea{
@@ -251,17 +248,25 @@ textarea{
 
 .hr{
   height:1px;
-  background: rgba(140,190,255,.16);
+  background: rgba(170,200,255,.14);
   margin: 14px 0;
 }
 
 /* ---- Notices ---- */
 .notice{
-  background: rgba(255,204,0,.08);
-  border: 1px solid rgba(255,204,0,.22);
+  border-radius: 14px;
   padding: 12px 14px;
-  border-radius: 12px;
-  color: rgba(255,230,160,.92);
+  color: rgba(234,240,255,.92);
+  border: 1px solid rgba(255,189,58,.22);
+  background:
+    radial-gradient(700px 220px at 15% 0%, rgba(255,189,58,.14), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+}
+
+.notice strong{
+  font-family: "Share Tech Mono", ui-monospace, monospace;
+  letter-spacing:.4px;
+  text-transform: uppercase;
 }
 
 /* ---- Buttons ---- */
@@ -275,48 +280,51 @@ textarea{
 
 button{
   border:0;
-  border-radius: 10px;
-
-  /* smaller + bold */
-  padding: 9px 12px;
-  font-size: 14px;
-  font-weight: 900;
+  border-radius: 12px;
+  padding: 10px 14px;
 
   cursor:pointer;
-  transition: transform .05s ease, filter .15s ease, opacity .15s ease, box-shadow .15s ease;
-  letter-spacing: .2px;
+  transition: transform .06s ease, filter .15s ease, opacity .15s ease, box-shadow .15s ease;
+  letter-spacing: .3px;
 
-  font-family: var(--mono);
+  font-family: "Share Tech Mono", ui-monospace, monospace;
   text-transform: uppercase;
 }
 
 button:active{ transform: translateY(1px); }
 
 .btn-primary{
-  color:#001018;
-  background:
-    linear-gradient(90deg, rgba(0,229,255,.95), rgba(138,91,255,.90));
+  color: rgba(0,10,14,.95);
+  background: linear-gradient(180deg, rgba(53,214,255,.95), rgba(53,214,255,.68));
   box-shadow:
-    0 10px 22px rgba(0,229,255,.10),
-    0 10px 22px rgba(138,91,255,.10);
+    0 14px 30px rgba(53,214,255,.18),
+    inset 0 1px 0 rgba(255,255,255,.30);
 }
 .btn-soft{
-  background: rgba(255,255,255,.06);
-  color: rgba(233,242,255,.92);
-  border: 1px solid rgba(140,190,255,.18);
+  color: rgba(234,240,255,.92);
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border: 1px solid rgba(170,200,255,.18);
 }
 .btn-danger{
-  background: linear-gradient(90deg, rgba(255,59,92,.92), rgba(255,120,120,.80));
-  color:#130008;
+  color: rgba(255,255,255,.95);
+  background: linear-gradient(180deg, rgba(255,59,77,.95), rgba(255,59,77,.65));
+  box-shadow:
+    0 14px 30px rgba(255,59,77,.14),
+    inset 0 1px 0 rgba(255,255,255,.22);
 }
 
+/* Header outline buttons: chrome pills */
 .btn-outline{
-  background: rgba(255,255,255,.92);
-  border: 1px solid rgba(0,0,0,.12);
-  color: #000;
+  color: rgba(234,240,255,.92);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  border: 1px solid rgba(170,200,255,.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 12px 26px rgba(0,0,0,.25);
 }
 
-button:hover{ filter: brightness(1.06); }
+button:hover{ filter: brightness(1.05); }
 button:disabled{
   opacity:.5;
   cursor:not-allowed;
@@ -324,178 +332,43 @@ button:disabled{
   filter:none;
 }
 
-/* ---- Make the Next button visually consistent (kept!) ---- */
-#nextBtn{
-  background: linear-gradient(90deg, rgba(0,229,255,.95), rgba(0,255,154,.90));
-  color:#001018;
-}
-
-/* Optional: keep Back/Next aligned nicely on small screens */
-#backBtn, #nextBtn{
-  min-width: 120px;
-}
-
 /* ---- Progress ---- */
 .progress{
   height:8px;
-  background: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.10);
   border-radius:999px;
   overflow:hidden;
-  border: 1px solid rgba(140,190,255,.14);
+  border: 1px solid rgba(170,200,255,.14);
 }
 .progress > div{
   height:100%;
   width:0%;
-  background: linear-gradient(90deg, rgba(0,229,255,.95), rgba(0,255,154,.90));
+  background:
+    linear-gradient(90deg, rgba(53,214,255,.85), rgba(138,92,255,.75));
   transition: width .2s ease;
+  box-shadow: 0 0 18px rgba(53,214,255,.20);
 }
-
-/* ---- KPI ---- */
-.kpi{
-  display:grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap:10px;
-}
-.kpi .box{
-  border: 1px solid rgba(140,190,255,.18);
-  border-radius: 12px;
-  padding: 10px;
-  background: rgba(4,8,14,.55);
-}
-.kpi .box .n{ font-size: 24px; font-weight: 800; color: rgba(233,242,255,.95); }
-.kpi .box .t{ font-size: 12px; color: var(--muted); font-family: var(--mono); text-transform: uppercase; letter-spacing:.7px; }
 
 /* ---- Simple status colors ---- */
-.good{ color: var(--good); font-weight:700; }
-.warn{ color: var(--warn); font-weight:700; }
-.bad{ color: var(--bad); font-weight:700; }
+.good{ color: var(--mint); font-weight:800; }
+.warn{ color: var(--amber); font-weight:800; }
+.bad{  color: var(--red); font-weight:800; }
 
-/* ---- Tables (if any results tables exist) ---- */
-table{
-  width:100%;
-  border-collapse:collapse;
-}
+/* ---- Tables ---- */
+table{ width:100%; border-collapse:collapse; }
 th, td{
   padding:10px;
-  border-bottom:1px solid rgba(140,190,255,.16);
+  border-bottom:1px solid rgba(170,200,255,.14);
 }
 th{
   text-align:left;
   font-size:12px;
-  color: rgba(233,242,255,.78);
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing:.8px;
-}
-
-/* ---- Responsive ---- */
-@media (max-width: 900px){
-  .kpi{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .row > *{ min-width: 200px; }
-}
-
-@media (max-width: 520px){
-  .bar{ flex-direction:column; align-items:flex-start; }
-  .btns button{ width:100%; }
-  #backBtn, #nextBtn{ width:100%; }
-}
-
-/* ---- Layout Split ---- */
-.hero-split{
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 40px 18px 70px;
-  display: grid;
-  grid-template-columns: 1.1fr .9fr;
-  gap: 26px;
-  align-items: start;
-}
-@media (max-width: 920px){
-  .hero-split{ grid-template-columns: 1fr; }
-}
-
-/* ---- Right Visual Panel ---- */
-.visual-card{
-  background:
-    radial-gradient(520px 260px at 20% 10%, rgba(0,229,255,.12), rgba(0,0,0,0) 60%),
-    rgba(255,255,255,.04);
-  border: 1px solid rgba(0,229,255,.16);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  position: sticky;
-  top: 18px;
-}
-@media (max-width: 920px){
-  .visual-card{ position: relative; top: auto; }
-}
-
-.visual-head{
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(0,229,255,.14);
-}
-.visual-head .label{
-  color: rgba(233,242,255,.92);
-  font-weight: 700;
-  letter-spacing: .9px;
-  font-size: 13px;
-  font-family: var(--mono);
+  color: rgba(234,240,255,.78);
+  font-family: "Share Tech Mono", ui-monospace, monospace;
   text-transform: uppercase;
 }
-.visual-head .hint{
-  color: rgba(233,242,255,.58);
-  font-size: 12px;
-  font-family: var(--mono);
-}
 
-/* ---- Media ---- */
-.visual-media{
-  aspect-ratio: 4 / 5;
-  width: 100%;
-  background:
-    radial-gradient(circle at 40% 30%, rgba(0,229,255,.18), rgba(0,0,0,0) 55%),
-    radial-gradient(circle at 70% 70%, rgba(138,91,255,.12), rgba(0,0,0,0) 60%),
-    rgba(0,0,0,.35);
-  display: grid;
-  place-items: center;
-}
-
-.visual-media video,
-.visual-media img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: saturate(1.10) contrast(1.08);
-}
-
-/* ---- Subtle animated glow frame ---- */
-.visual-card::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  border-radius: calc(var(--radius) + 2px);
-  background: conic-gradient(from 180deg,
-    rgba(0,229,255,.0),
-    rgba(0,229,255,.22),
-    rgba(138,91,255,.22),
-    rgba(0,255,154,.18),
-    rgba(0,229,255,.0)
-  );
-  filter: blur(14px);
-  opacity: .55;
-  pointer-events:none;
-  animation: aura 3.2s ease-in-out infinite;
-}
-@keyframes aura{
-  0%,100%{ opacity:.35; transform: scale(1.0); }
-  50%{ opacity:.65; transform: scale(1.01); }
-}
-
-/* ---- Totals (only two) ---- */
+/* ---- Totals ---- */
 .totals{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -503,64 +376,92 @@ th{
   margin-top: 12px;
 }
 .total-box{
-  border: 1px solid rgba(140,190,255,.18);
-  border-radius: 12px;
+  border: 1px solid rgba(170,200,255,.18);
+  border-radius: 14px;
   padding: 12px;
-  background: rgba(4,8,14,.55);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
 }
-.total-box .n{ font-size: 28px; font-weight: 900; color: rgba(233,242,255,.95); }
+.total-box .n{
+  font-size: 30px;
+  font-weight: 900;
+  font-family: "Share Tech Mono", ui-monospace, monospace;
+  letter-spacing:.6px;
+}
 .total-box .t{
   font-size: 12px;
   color: var(--muted);
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing:.7px;
 }
 
-/* Hide old KPI grids if you brought them back but don’t want them shown */
+/* Hide old KPI grids if present */
 .kpi.is-hidden{ display:none !important; }
 .totals.is-hidden{ display:none !important; }
 
-/* ---- Charts: card wrapper + hard height so it can't stretch the page ---- */
+/* ---- KPI (if used elsewhere) ---- */
+.kpi{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap:10px;
+}
+.kpi .box{
+  border: 1px solid rgba(170,200,255,.16);
+  border-radius: 14px;
+  padding: 10px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+}
+.kpi .box .n{
+  font-size: 22px;
+  font-weight: 900;
+  font-family: "Share Tech Mono", ui-monospace, monospace;
+}
+.kpi .box .t{
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---- Charts ---- */
 .chart-wrap{
   margin-top: 12px;
   padding: 14px;
-  border: 1px solid rgba(140,190,255,.18);
-  border-radius: 12px;
-  background: rgba(4,8,14,.55);
+  border: 1px solid rgba(170,200,255,.16);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
 }
 
-/* One combined chart container */
+.chart-wrap h3{ margin: 0 0 8px; }
+
 .chart-canvas{
   width: 100% !important;
   height: var(--chart-h) !important;
   display:block;
 }
 
-/* Chart.js will set inline styles sometimes; force the internal canvas to obey height */
 .chart-wrap canvas{
   width: 100% !important;
   height: 100% !important;
 }
 
-/* ---- Charts: hard clamp height ---- */
+/* Keep Results charts compact if you want */
 #resultsCard .chart-wrap{
-  height: 190px;           /* container height (includes title) */
+  height: 210px;
   overflow: hidden;
 }
-
-#resultsCard .chart-wrap h3{
-  margin: 0 0 8px;
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: .9px;
-  font-size: 13px;
-  color: rgba(233,242,255,.90);
+#resultsCard .chart-canvas{
+  height: 160px !important;
+  max-height: 160px !important;
 }
 
-#resultsCard .chart-canvas{
-  height: 150px !important;   /* actual chart area */
-  max-height: 150px !important;
-  width: 100% !important;
-  display: block;
+/* ---- Responsive ---- */
+@media (max-width: 900px){
+  .kpi{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .row > *{ min-width: 200px; }
+  .totals{ grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px){
+  .bar{ flex-direction:column; align-items:flex-start; }
+  .btns button{ width:100%; }
+  #backBtn, #nextBtn{ width:100%; }
 }
