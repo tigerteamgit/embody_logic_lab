@@ -1,5 +1,5 @@
 /* ---- Creative Expansion Lab: app.js ---- */
-/* Build stamp (change this line to force a visible diff in commits): 2026-02-27-01 */
+/* Build stamp (change this line to force a visible diff in commits): 2026-02-27-02 */
 
 /* ---- App bootstrap ---- */
 (() => {
@@ -274,8 +274,16 @@
       displayName: "",
       startedAt: null,
       finishedAt: null,
+
+      /* Manual Active Timer (start/stop anytime) */
       activeSeconds: 0,
+      _activeRunning: false,
+      _activeStartedAtMs: null,
+      _activeIntervalId: null,
+
       roundIndex: 0,
+
+      /* Keep the round countdown timer object (still used if you want it) */
       timer: { running:false, endAt: null, intervalId: null },
     };
 
@@ -291,6 +299,11 @@
     const stepLabel = document.getElementById("stepLabel");
     const modeLabel = document.getElementById("modeLabel");
     const nextBtn = document.getElementById("nextBtn");
+
+    /* Manual timer buttons (must exist in cel.html) */
+    const timerStartBtn = document.getElementById("timerStartBtn");
+    const timerStopBtn  = document.getElementById("timerStopBtn");
+    const timerResetBtn = document.getElementById("timerResetBtn");
 
     /* ---- Charts State ---- */
     let creativeChartInstance = null;
@@ -453,14 +466,72 @@
       modeLabel.textContent = `Mode: ${state.attemptType === "baseline" ? "Baseline" : "Post"}`;
     }
 
-    /* ---- Timer (no auto-advance) ---- */
+    /* ---- Manual Active Timer (start/stop anytime) ---- */
+    function setTimerButtons(){
+      if(!timerStartBtn || !timerStopBtn) return;
+      timerStartBtn.disabled = !!state._activeRunning;
+      timerStopBtn.disabled  = !state._activeRunning;
+    }
+
+    function renderActiveTimerPill(){
+      if(!timerPill) return;
+
+      let total = state.activeSeconds || 0;
+      if(state._activeRunning && state._activeStartedAtMs){
+        const extra = Math.floor((Date.now() - state._activeStartedAtMs) / 1000);
+        total += Math.max(0, extra);
+      }
+      timerPill.textContent = `Timer: ${fmtTime(total)}`;
+    }
+
+    function startActiveTimer(){
+      if(state._activeRunning) return;
+      state._activeRunning = true;
+      state._activeStartedAtMs = Date.now();
+
+      if(state._activeIntervalId) clearInterval(state._activeIntervalId);
+      state._activeIntervalId = setInterval(renderActiveTimerPill, 250);
+
+      setTimerButtons();
+      renderActiveTimerPill();
+    }
+
+    function stopActiveTimer(){
+      if(!state._activeRunning) return;
+
+      const extra = state._activeStartedAtMs
+        ? Math.floor((Date.now() - state._activeStartedAtMs) / 1000)
+        : 0;
+
+      state.activeSeconds = (state.activeSeconds || 0) + Math.max(0, extra);
+
+      state._activeRunning = false;
+      state._activeStartedAtMs = null;
+
+      if(state._activeIntervalId) clearInterval(state._activeIntervalId);
+      state._activeIntervalId = null;
+
+      setTimerButtons();
+      renderActiveTimerPill();
+    }
+
+    function resetActiveTimer(){
+      state.activeSeconds = 0;
+      state._activeRunning = false;
+      state._activeStartedAtMs = null;
+
+      if(state._activeIntervalId) clearInterval(state._activeIntervalId);
+      state._activeIntervalId = null;
+
+      setTimerButtons();
+      renderActiveTimerPill();
+    }
+
+    /* ---- Round Countdown Timer (kept; DOES NOT drive the pill anymore) ---- */
     function startTimer(seconds){
       stopTimer();
 
-      if(!seconds || seconds <= 0){
-        timerPill.textContent = `Timer: 00:00`;
-        return;
-      }
+      if(!seconds || seconds <= 0) return;
 
       state.timer.running = true;
       const now = Date.now();
@@ -469,11 +540,8 @@
       state.timer.intervalId = setInterval(() => {
         const leftMs = state.timer.endAt - Date.now();
         const left = Math.max(0, Math.ceil(leftMs/1000));
-        timerPill.textContent = `Timer: ${fmtTime(left)}`;
-
         if(left <= 0){
           stopTimer();
-          timerPill.textContent = `Timer: 00:00`;
         }
       }, 250);
     }
@@ -491,10 +559,13 @@
       introCard.style.display = "block";
       labCard.style.display = "none";
       resultsCard.style.display = "none";
-      timerPill.textContent = `Timer: 00:00`;
+
       progressBar.style.width = "0%";
       stepLabel.textContent = "Step";
       modeLabel.textContent = `Mode: ${state.attemptType === "baseline" ? "Baseline" : "Post"}`;
+
+      setTimerButtons();
+      renderActiveTimerPill();
     }
 
     function showLab(){
@@ -503,6 +574,9 @@
       resultsCard.style.display = "none";
       destroyCharts();
       unlockNext();
+
+      setTimerButtons();
+      renderActiveTimerPill();
     }
 
     function showResults(attempt){
@@ -537,6 +611,9 @@
 
       /* Render charts ONLY on Results screen */
       requestAnimationFrame(() => renderCharts(attempt));
+
+      setTimerButtons();
+      renderActiveTimerPill();
     }
 
     /* ---- Start / Reset ---- */
@@ -545,7 +622,10 @@
       state.displayName = document.getElementById("displayName").value.trim();
       state.startedAt = new Date().toISOString();
       state.finishedAt = null;
-      state.activeSeconds = 0;
+
+      /* Reset manual timer for new attempt (do NOT auto-start) */
+      resetActiveTimer();
+
       state.roundIndex = 0;
 
       showLab();
@@ -554,14 +634,18 @@
 
     function resetAttempt(clearName){
       stopTimer();
+      resetActiveTimer();
+
       for (const key of Object.keys(state)) {
         if (key.startsWith("r") || key.startsWith("s")) delete state[key];
       }
       state.startedAt = null;
       state.finishedAt = null;
-      state.activeSeconds = 0;
       state.roundIndex = 0;
       if(clearName) state.displayName = "";
+
+      setTimerButtons();
+      renderActiveTimerPill();
     }
 
     function resetAll(){
@@ -602,8 +686,12 @@
 
       unlockNext();
 
-      timerPill.textContent = `Timer: ${fmtTime(round.timedSeconds || 0)}`;
+      /* Keep optional countdown running silently (no header changes) */
       startTimer(round.timedSeconds || 0);
+
+      /* Header pill is manual timer */
+      setTimerButtons();
+      renderActiveTimerPill();
     }
 
     /* ---- Scoring ---- */
@@ -687,6 +775,10 @@
       stopTimer();
       state.finishedAt = new Date().toISOString();
 
+      /* Capture any currently-running manual time */
+      stopActiveTimer();
+      const elapsedSec = state.activeSeconds || 0;
+
       const ideas = [
         ...splitIdeas(state.r1_water || ""),
         ...splitIdeas(state.r1_rock || ""),
@@ -709,10 +801,6 @@
       const somatic = scoreSomaticIndex(state.s1_fold, state.s2_reps, state.s3_balance_sec, state.s4_recovery_sec);
       const ees = Math.round((cei + somatic.sei) / 2);
       const gap = Math.abs(cei - somatic.sei);
-
-      const elapsedSec = state.startedAt
-        ? Math.max(0, Math.round((Date.parse(state.finishedAt) - Date.parse(state.startedAt)) / 1000))
-        : 0;
 
       const attempt = {
         id: cryptoRandomId(),
@@ -876,7 +964,14 @@
     document.getElementById("exportBtn").onclick = exportCSV;
     document.getElementById("resetAllBtn").onclick = resetAll;
 
+    /* Manual timer buttons (requires these IDs in cel.html) */
+    if(timerStartBtn) timerStartBtn.onclick = startActiveTimer;
+    if(timerStopBtn)  timerStopBtn.onclick  = stopActiveTimer;
+    if(timerResetBtn) timerResetBtn.onclick = resetActiveTimer;
+
     /* ---- Init ---- */
+    setTimerButtons();
+    renderActiveTimerPill();
     showIntro();
   });
 })();
