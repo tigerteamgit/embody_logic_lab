@@ -647,7 +647,7 @@
       state.startedAt = null;
       state.finishedAt = null;
       state.roundIndex = 0;
-      if(clearName) state.displayName = "";
+      /*if(clearName) state.displayName = "";*/
 
       setTimerButtons();
       renderActiveTimerPill();
