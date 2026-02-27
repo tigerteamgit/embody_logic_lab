@@ -271,7 +271,8 @@
     /* ---- App state ---- */
     const state = {
       attemptType: "baseline",
-      displayName: "",
+      age: null,
+      gender: "",
       startedAt: null,
       finishedAt: null,
 
@@ -619,7 +620,11 @@
     /* ---- Start / Reset ---- */
     function startLab(){
       state.attemptType = document.getElementById("attemptType").value;
-      state.displayName = document.getElementById("displayName").value.trim();
+      const ageEl = document.getElementById("age");
+      const genderEl = document.getElementById("gender");
+
+      state.age = ageEl && ageEl.value !== "" ? Number(ageEl.value) : null;
+      state.gender = genderEl ? String(genderEl.value || "") : "";
       state.startedAt = new Date().toISOString();
       state.finishedAt = null;
 
@@ -806,7 +811,8 @@
         id: cryptoRandomId(),
         meta: {
           attemptType: state.attemptType,
-          displayName: state.displayName,
+          age: state.age,
+          gender: state.gender,
           startedAt: state.startedAt,
           finishedAt: state.finishedAt,
           activeSeconds: elapsedSec
@@ -924,10 +930,22 @@
         return;
       }
 
-      const headers = ["id","attemptType","displayName","startedAt","finishedAt","activeSeconds","cei","sei","ees","gap"];
+      const headers = ["id","attemptType","age", "gender", "startedAt","finishedAt","activeSeconds","cei","sei","ees","gap"];
       const rows = attempts.map(a => {
         const m=a.meta, s=a.scores;
-        const vals = [a.id,m.attemptType,m.displayName||"",m.startedAt,m.finishedAt,m.activeSeconds,s.cei,s.sei,s.ees,s.gap];
+        const vals = [
+          a.id,
+          m.attemptType,
+          m.age ?? "",
+          m.gender ?? "",
+          m.startedAt,
+          m.finishedAt,
+          m.activeSeconds,
+          s.cei,
+          s.sei,
+          s.ees,
+          s.gap
+        ];
         return vals.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(",");
       });
 
