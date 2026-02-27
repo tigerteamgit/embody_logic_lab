@@ -1,5 +1,5 @@
 /* ---- Creative Expansion Lab: app.js ---- */
-/* Build stamp (change this line to force a visible diff in commits): 2026-02-27-02 */
+/* Build stamp (change this line to force a visible diff in commits): 2026-02-27-03 */
 
 /* ---- App bootstrap ---- */
 (() => {
@@ -9,6 +9,32 @@
 
     /* ---- Storage ---- */
     const STORAGE_KEY = "cel_attempts_v1";
+
+    /* ---- Google Form Submit (writes to your linked Google Sheet) ---- */
+    const FORM_ACTION_URL =
+      "https://docs.google.com/forms/d/e/1FAIpQLSeVsCDQdR1l72BI5JydqaQSJZ7MedzAhfd2fWZe7S4Vm9UxwA/formResponse";
+
+    function submitToGoogleForm(attempt){
+      try{
+        const params = new URLSearchParams();
+
+        // Your entry IDs (from your prefilled URL)
+        params.set("entry.831702142", String(attempt.meta.age ?? ""));      // age
+        params.set("entry.1361940566", String(attempt.meta.gender ?? ""));  // gender
+        params.set("entry.1205938724", String(attempt.scores.sei ?? ""));   // SEI
+        params.set("entry.1341822091", String(attempt.scores.cei ?? ""));   // CEI
+
+        // Fire-and-forget; browser won't allow reading response in no-cors.
+        fetch(FORM_ACTION_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: params.toString()
+        });
+      } catch (err){
+        console.warn("Google Form submit failed:", err);
+      }
+    }
 
     /* ---- Helpers ---- */
     function val(id){ const el=document.getElementById(id); return el ? el.value.trim() : ""; }
@@ -839,6 +865,10 @@
       };
 
       saveAttempt(attempt);
+
+      // ✅ Send to your Google Form (which writes into your linked "embody analytics" Sheet)
+      submitToGoogleForm(attempt);
+
       showResults(attempt);
     }
 
@@ -930,7 +960,7 @@
         return;
       }
 
-      const headers = ["id","attemptType","age", "gender", "startedAt","finishedAt","activeSeconds","cei","sei","ees","gap"];
+      const headers = ["id","attemptType","age","gender","startedAt","finishedAt","activeSeconds","cei","sei","ees","gap"];
       const rows = attempts.map(a => {
         const m=a.meta, s=a.scores;
         const vals = [
@@ -971,7 +1001,7 @@
       }
       return String(Math.random()).slice(2) + "-" + String(Date.now());
     }
-    
+
     /* ---- Safe Bind Helper ---- */
     function bind(id, handler){
       const el = document.getElementById(id);
@@ -1001,7 +1031,7 @@
     bind("timerStartBtn", (e) => { flashPressed(e.currentTarget); startActiveTimer(); });
     bind("timerStopBtn",  (e) => { flashPressed(e.currentTarget); stopActiveTimer(); });
     bind("timerResetBtn", (e) => { flashPressed(e.currentTarget); resetActiveTimer(); });
-   
+
     /* Next button */
     if(nextBtn){
       nextBtn.onclick = () => { unlockNext(); nextRound(); };
