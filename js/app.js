@@ -977,7 +977,7 @@
     bind("retakeBtn", () => { resetAttempt(false); showIntro(); });
     bind("backHomeBtn", showIntro);
     bind("exportBtn", exportCSV);
-    bind("resetAllBtn", resetAll);
+    /*bind("resetAllBtn", resetAll);*/
 
     /* Timer buttons */
     bind("timerStartBtn", (e) => { flashPressed(e.currentTarget); startActiveTimer(); });
