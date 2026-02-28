@@ -1335,46 +1335,37 @@ showIntro();
 console.log("[CEL] loaded. Try CEL.checks(), CEL.manualTimer.start(), CEL.manualTimer.stop()");
 </script>
 
-<script type="module">
-/* ---- Google Form Prefill ---- */
-const FORM_BASE =
-  "https://docs.google.com/forms/d/e/1FAIpQLScNwHZ84QCIv2qVvvSt_q8QFW3i4K8IJV9uYhkPnadgEQXkyQ/viewform?usp=pp_url";
+<script>
+/* ---- Make.com Webhook ---- */
+const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/h6ui6atlzdassb367c7r1y1xtise9wvj";
 
-const ENTRY = {
-  age: "537165723",
-  gender: "2076404710",
-  sei: "449024149",
-  cei: "1318495974",
-};
-
-function buildPrefillUrl({ age, gender, sei, cei }) {
-  const u = new URL(FORM_BASE);
-  u.searchParams.set(`entry.${ENTRY.age}`, String(age ?? ""));
-  u.searchParams.set(`entry.${ENTRY.gender}`, String(gender ?? ""));
-  u.searchParams.set(`entry.${ENTRY.sei}`, String(sei ?? ""));
-  u.searchParams.set(`entry.${ENTRY.cei}`, String(cei ?? ""));
-  return u.toString();
+function sendToMake(payload){
+  // fire-and-forget; avoids CORS blocking the request
+  fetch(MAKE_WEBHOOK_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=UTF-8" }, // "simple" request
+    body: JSON.stringify(payload)
+  });
 }
 
 // Call this when the lab finishes
-window.openPrefilledGoogleForm = function openPrefilledGoogleForm() {
-  // TODO: replace these with your actual lab variables
+window.submitLabToMake = function submitLabToMake(){
   const payload = {
-    age: window.labAge,
-    gender: window.labGender,
-    sei: window.SEI,
-    cei: window.CEI,
+    ts: new Date().toISOString(),
+    age: window.labAge ?? "",
+    gender: window.labGender ?? "",
+    sei: window.SEI ?? "",
+    cei: window.CEI ?? ""
   };
 
-  const url = buildPrefillUrl(payload);
-
-  // Open in a new tab so your lab page stays put
-  window.open(url, "_blank", "noopener,noreferrer");
+  sendToMake(payload);
+  alert("Submitted ✅");
 };
 </script>
 
-<button type="button" onclick="openPrefilledGoogleForm()">
-  Submit results to Google Form
-</button>  
+<button type="button" onclick="submitLabToMake()">Submit</button>  
+
+ 
 </body>
 </html>
