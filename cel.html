@@ -353,6 +353,9 @@
     <div class="btns">
       <button class="btn-soft" id="retakeBtn" type="button">New Attempt</button>
       <button class="btn-primary" id="backHomeBtn" type="button">Back Home</button>
+      <button class="btn-primary" id="submitMakeBtn" type="button" onclick="submitLabToMake()">
+        Submit to Make
+      </button>
     </div>
   </div>
 </main>
@@ -1344,49 +1347,38 @@ console.log("[CEL] loaded. Try CEL.checks(), CEL.manualTimer.start(), CEL.manual
 /* ---- Make.com Webhook ---- */
 const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/h6ui6atlzdassb367c7r1y1xtise9wvj";
 
-/* ---- Helpers ---- */
-function byId(id){ return document.getElementById(id); }
-function valOf(id){
-  const el = byId(id);
-  if(!el) return "";
-  // inputs/selects/textarea
-  if("value" in el) return (el.value ?? "").toString().trim();
-  // spans/divs/etc
-  return (el.textContent ?? "").toString().trim();
-}
-
-function numText(x){
-  const s = (x ?? "").toString().trim();
-  return s;
-}
-
-/* ---- Submit to Make ---- */
 window.submitLabToMake = function submitLabToMake(){
-  const a = window.CEL_LAST_ATTEMPT;
+  console.log("[CEL→MAKE] submit clicked");
 
-  if(!a || !a.scores){
-    alert("No scored attempt found yet. Finish the lab first.");
-    return;
-  }
-
+  // Pull from the results UI (these IDs exist in your HTML)
   const payload = {
     ts: new Date().toISOString(),
-    attemptType: a.meta?.attemptType ?? "",
-    age: a.meta?.age ?? "",
-    gender: a.meta?.gender ?? "",
-    sei: a.scores?.sei ?? "",
-    cei: a.scores?.cei ?? ""
+    attemptType: document.getElementById("attemptType")?.value || "",
+    age: document.getElementById("age")?.value || "",
+    gender: document.getElementById("gender")?.value || "",
+    sei: document.getElementById("seiTotalN")?.textContent?.trim() || "",
+    cei: document.getElementById("ceiTotalN")?.textContent?.trim() || ""
   };
 
-  console.log("Submitting to Make:", payload);
+  console.log("[CEL→MAKE] payload:", payload);
 
+  // ---- send (Beacon first, fetch fallback) ----
   const body = new URLSearchParams(payload).toString();
+
+  if (navigator.sendBeacon) {
+    const blob = new Blob([body], { type: "application/x-www-form-urlencoded;charset=UTF-8" });
+    const ok = navigator.sendBeacon(MAKE_WEBHOOK_URL, blob);
+    console.log("[CEL→MAKE] sendBeacon:", ok);
+    alert(ok ? "Submitted ✅" : "Submit failed ❌ (beacon)");
+    return;
+  }
 
   fetch(MAKE_WEBHOOK_URL, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-    body
+    body,
+    keepalive: true
   });
 
   alert("Submitted ✅");
