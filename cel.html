@@ -1348,9 +1348,7 @@ console.log("[CEL] loaded. Try CEL.checks(), CEL.manualTimer.start(), CEL.manual
 const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/h6ui6atlzdassb367c7r1y1xtise9wvj";
 
 window.submitLabToMake = function submitLabToMake(){
-  console.log("[CEL→MAKE] submit clicked");
 
-  // Pull from the results UI (these IDs exist in your HTML)
   const payload = {
     ts: new Date().toISOString(),
     attemptType: document.getElementById("attemptType")?.value || "",
@@ -1362,26 +1360,15 @@ window.submitLabToMake = function submitLabToMake(){
 
   console.log("[CEL→MAKE] payload:", payload);
 
-  // ---- send (Beacon first, fetch fallback) ----
-  const body = new URLSearchParams(payload).toString();
+  const blob = new Blob(
+    [JSON.stringify(payload)],
+    { type: "application/json" }
+  );
 
-  if (navigator.sendBeacon) {
-    const blob = new Blob([body], { type: "application/x-www-form-urlencoded;charset=UTF-8" });
-    const ok = navigator.sendBeacon(MAKE_WEBHOOK_URL, blob);
-    console.log("[CEL→MAKE] sendBeacon:", ok);
-    alert(ok ? "Submitted ✅" : "Submit failed ❌ (beacon)");
-    return;
-  }
+  const ok = navigator.sendBeacon(MAKE_WEBHOOK_URL, blob);
 
-  fetch(MAKE_WEBHOOK_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-    body,
-    keepalive: true
-  });
-
-  alert("Submitted ✅");
+  console.log("[CEL→MAKE] beacon sent:", ok);
+  alert(ok ? "Submitted ✅" : "Submit failed ❌");
 };
 </script>
  
