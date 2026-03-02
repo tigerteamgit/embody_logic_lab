@@ -10,6 +10,16 @@
   padding: 18px;
 }
 
+/* ---- Preview thumbnail (must stay small) ---- */
+.preview-thumb{
+  display:block;
+  width: 240px;     /* change size here */
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  border-radius: 12px;
+}
+
 
 /* ---- Creative Expansion Lab: styles.css ---- */
 /* Build stamp (change this line to force a visible diff in commits): 2026-02-27-01 */
