@@ -143,6 +143,90 @@
       transform: translateY(0px);
     }
 
+    /* ---- Preview actions ---- */
+    .preview-actions{
+      display:flex;
+      gap:14px;
+      margin: 10px 0 16px;
+      flex-wrap:wrap;
+    }
+
+    /* Force thumbnail sizing (overrides any global img{width:100%} in styles.css) */
+    .preview-thumb{
+      display:block;
+      width: 240px;
+      max-width: 100%;
+      height: auto;
+      cursor:pointer;
+      border-radius: 12px;
+    }
+
+    /* ---- Modal overlay ---- */
+    .modal{
+      display:none;              /* hidden by default */
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background:rgba(0,0,0,.75);
+      backdrop-filter: blur(4px);
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+    }
+    .modal[aria-hidden="false"]{ display:flex; }
+
+    .modal-box{
+      position:relative;
+      width:min(720px, 96vw);
+      background:#ffffff;
+      color:#111;
+      border-radius:14px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      padding:18px 18px 14px;
+    }
+    .modal-box h3{
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+    .modal-scroll{
+      max-height: 70vh;
+      overflow:auto;
+      padding-right: 6px;
+      line-height: 1.45;
+    }
+    .modal-scroll ul{
+      margin: 10px 0 14px;
+      padding-left: 18px;
+    }
+    .modal-scroll li{ margin: 8px 0; }
+
+    .modal-close{
+      position:absolute;
+      top:10px;
+      right:10px;
+      background:#f2f2f2;
+      color:#111;
+      width:34px;
+      height:34px;
+      border:0;
+      border-radius:999px;
+      text-align:center;
+      line-height:34px;
+      font-size:22px;
+      cursor:pointer;
+    }
+    .modal-close:hover{ background:#e8e8e8; }
+
+    .modal-box-image{
+      width:min(900px, 96vw);
+    }
+    .modal-image{
+      width:100%;
+      height:auto;
+      border-radius:12px;
+      display:block;
+    }
+
     /* ---- Reduced motion ---- */
     @media (prefers-reduced-motion: reduce){
       .bg-image,
@@ -175,6 +259,7 @@
         <section class="card">
           <h2>Preview</h2>
           <p>You can explore how the system works before buying.</p>
+
           <div class="preview-actions">
             <a href="#" id="openIntroModal" class="button">Read Introduction</a>
             <a href="#" id="openImageModal" class="button">View Assessment Image</a>
@@ -212,7 +297,100 @@
       </div>
     </main>
 
+    <!-- Intro Text Modal (PLACED OUTSIDE main so it never affects layout) -->
+    <div id="introModal" class="modal" aria-hidden="true">
+      <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+        <button class="modal-close" type="button" aria-label="Close">&times;</button>
+
+        <h3 id="introTitle">Embody Logic System Introduction</h3>
+
+        <div class="modal-scroll">
+          <p>
+            Connect to your SUPER INTELLIGENCE. Are you ready to truly start life anew? Then take this leap and invest in YOU.
+          </p>
+
+          <p>With this course, you are guaranteed to:</p>
+
+          <ul>
+            <li>✔ Stretch your body and mind to new levels that will bring MEASURABLE and TRACEABLE IMPROVEMENT in your CREATIVITY, LOGIC, and HEALTH.</li>
+            <li>✔ Engage your body, mind, and spirit connection to build fresh neural pathways that regulate your nervous system and increase functionality. Utilize somatic movement to integrate lessons into your being to SHIFT TIMELINES to a brand new reality that reflects HIGHER SELF ESTEEM.</li>
+            <li>✔ Apply right-brain activation to ELEVATE COGNITIVE ABILITIES and performance in your career. Access deeper levels of awareness that take you to your desired reality through practical steps to become more flexible in your approaches.</li>
+          </ul>
+
+          <p><strong>SEQUENCES:</strong> [Play 5D Holistic Chess, not 3D Karmic Checkers]</p>
+          <p><strong>WIN EVERY SINGLE GAME. CHANGE THE ENTIRE BOARD. REPLACE IT!</strong></p>
+          <p>Free Flow Circulatory Touch-Points with clear minds for Quantum Leaps</p>
+          <p>Mini-Parkour Freestyle to Tap into YOUR INNER ELEMENT and channel your CREATIVE SYSTEM</p>
+          <p>Awaken Ambidexterity: Synergize your Brain with Your Tactile Senses to be more grounded in healthy boundaries and Quick Responsiveness when navigating complexity</p>
+          <p>This is not a product - it's a decade's worth of experience playing the game right.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Modal (PLACED OUTSIDE main so it never affects layout) -->
+    <div id="imageModal" class="modal" aria-hidden="true">
+      <div class="modal-box modal-box-image" role="dialog" aria-modal="true" aria-labelledby="imageTitle">
+        <button class="modal-close" type="button" aria-label="Close">&times;</button>
+
+        <h3 id="imageTitle">Assessment Illustration</h3>
+        <img src="img/baseline.png" class="modal-image" alt="assessment illustration">
+      </div>
+    </div>
+
     <script src="js/app.js"></script>
+
+    <script>
+      /* ---- Preview Modals ---- */
+      (() => {
+        function openModal(modal){
+          if(!modal) return;
+          modal.setAttribute("aria-hidden","false");
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeModal(modal){
+          if(!modal) return;
+          modal.setAttribute("aria-hidden","true");
+          document.body.style.overflow = "";
+        }
+
+        const introModal = document.getElementById("introModal");
+        const imageModal = document.getElementById("imageModal");
+
+        const openIntro = document.getElementById("openIntroModal");
+        const openImage = document.getElementById("openImageModal");
+        const openThumb = document.getElementById("openImageThumb");
+
+        openIntro?.addEventListener("click", (e) => {
+          e.preventDefault();
+          openModal(introModal);
+        });
+
+        openImage?.addEventListener("click", (e) => {
+          e.preventDefault();
+          openModal(imageModal);
+        });
+
+        openThumb?.addEventListener("click", () => {
+          openModal(imageModal);
+        });
+
+        // Close buttons
+        introModal?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(introModal));
+        imageModal?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(imageModal));
+
+        // Click backdrop to close
+        introModal?.addEventListener("click", (e) => { if(e.target === introModal) closeModal(introModal); });
+        imageModal?.addEventListener("click", (e) => { if(e.target === imageModal) closeModal(imageModal); });
+
+        // ESC closes whichever is open
+        document.addEventListener("keydown", (e) => {
+          if(e.key !== "Escape") return;
+          closeModal(introModal);
+          closeModal(imageModal);
+        });
+      })();
+    </script>
   </div>
 </body>
 </html>
