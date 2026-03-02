@@ -519,9 +519,9 @@ th{
 /* ---- Preview link color override ---- */
 .preview-actions .button,
 .preview-actions .button:visited {
-  color: #00eaff !important; /* electric cyan */
+  color: #5ff6ff !important; /* electric cyan */
 }
 
 .preview-actions .button:hover {
-  color: #5ff6ff !important; /* brighter on hover */
+  color: #00eaff !important; /* brighter on hover */
 }
