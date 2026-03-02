@@ -1,5 +1,5 @@
 .prev-img1 {
-  width: 200px;      /* set exact width */
+  width: 400px;      /* set exact width */
   max-width: 100%;   /* keeps it responsive */
   height: auto;      /* maintains aspect ratio */
 }
