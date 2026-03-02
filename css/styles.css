@@ -531,3 +531,11 @@ th{
   text-decoration: none !important;
 }
 
+/* ---- Remove underline/line styling from these links ---- */
+.preview-actions .button,
+.button.primary{
+  text-decoration: none !important;
+  border-bottom: 0 !important;
+  background-image: none !important;
+}
+
