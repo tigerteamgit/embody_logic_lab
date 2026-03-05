@@ -10,6 +10,20 @@
     /* ---- Storage ---- */
     const STORAGE_KEY = "cel_attempts_v1";
 
+    /* ---- Persistent User ID ---- */
+
+    function getUserId() {
+
+      let id = localStorage.getItem("cel_user_id");
+
+      if(!id){
+        id = crypto.randomUUID();
+        localStorage.setItem("cel_user_id", id);
+      }
+
+      return id;
+    }
+
     /* ---- Google Form Submit (writes to your linked Google Sheet) ---- */
     const FORM_ACTION_URL =
       "https://docs.google.com/forms/d/e/1FAIpQLSeVsCDQdR1l72BI5JydqaQSJZ7MedzAhfd2fWZe7S4Vm9UxwA/formResponse";
