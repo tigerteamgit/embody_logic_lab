@@ -1,7 +1,7 @@
 {
 "name": "Embodied Logic",
 "short_name": "Embody Logic",
-"start_url": "/embody_logic_lab/?access=YOURTOKEN",
+"start_url": "/embody-logic/?access=YOURTOKEN",
 "display": "standalone",
 "background_color": "#ffffff",
 "theme_color": "#000000"
