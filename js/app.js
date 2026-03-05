@@ -4,7 +4,7 @@ if ("serviceWorker" in navigator) {
 }
 
 /* ---- Access Gate (Preview allowed) ---- */
-const ACCESS_TOKEN = "111TTR"; // change this
+const ACCESS_TOKEN = "121TTR"; // change this
 const params = new URLSearchParams(window.location.search);
 const isUnlocked = params.get("access") === ACCESS_TOKEN;
 
