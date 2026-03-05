@@ -230,7 +230,7 @@
       <button class="btn-outline" id="timerStopBtn" type="button">Stop</button>
       <button class="btn-outline" id="timerResetBtn" type="button">Reset Timer</button>
 
-      <button class="btn-outline" id="exportBtn" type="button">Export CSV</button>
+      <button class="btn-outline" id="exportBtn" type="button">Export JSON</button>
     </div>
   </div>
 
@@ -250,7 +250,7 @@
     <h1>Baseline + Post Course Assessment</h1>
     <p class="muted">
       This is a timed creativity + cognition experiment + a simple somatic expansion check. You’ll take it twice:
-      once at the start (Baseline) and once at the end (Post). Your results stay on your device and can be exported as CSV.
+      once at the start (Baseline) and once at the end (Post). Your results stay on your device and can be exported as a JSON File.
       <span>Age and gender are optional and used only for aggregate analytics.</span>
     </p>
 
@@ -1358,6 +1358,25 @@ window.submitLabToMake = function submitLabToMake(){
 
   console.log("[CEL→MAKE] payload:", payload);
 
+  fetch(MAKE_WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(res => {
+    if(res.ok){
+      alert("Submitted successfully.");
+    } else {
+      alert("Submission failed.");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Network error.");
+  });
+/*
   // ✅ Simple request -> no preflight
   fetch(MAKE_WEBHOOK_URL, {
     method: "POST",
@@ -1366,7 +1385,7 @@ window.submitLabToMake = function submitLabToMake(){
     body: JSON.stringify(payload),
     keepalive: true
   });
-
+*/
   alert("Submitted ✅");
 };
 </script>
