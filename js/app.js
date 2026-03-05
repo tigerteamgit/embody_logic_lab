@@ -1012,6 +1012,14 @@
       el.onclick = handler;
     }
 
+    /* ---- Upload baseline toggle ---- */
+    const uploadToggle = document.getElementById("baselineFile");
+    const uploadSection = document.getElementById("baselineFileSection");
+
+    uploadToggle.addEventListener("change", () => {
+      uploadSection.style.display = uploadToggle.checked ? "block" : "none";
+    });
+
     function flashPressed(el){
       if(!el) return;
       el.classList.add("is-pressed");
