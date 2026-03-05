@@ -399,9 +399,33 @@
         });
 
         // Close buttons
+        /*
         introModal?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(introModal));
         imageModal?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(imageModal));
         imageModal2?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(imageModal2));
+        */
+
+        /* ---- Modal Open Buttons ---- */
+        document.querySelectorAll("[data-modal]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const modal = document.getElementById(btn.dataset.modal);
+            if (modal) {
+              modal.style.display = "flex";
+              modal.setAttribute("aria-hidden", "false");
+            }
+          });
+        });
+
+        /* ---- Modal Close Buttons ---- */
+        document.querySelectorAll(".modal-close").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const modal = btn.closest(".modal");
+            if (modal) {
+              modal.setAttribute("aria-hidden", "true");
+              modal.style.display = "none";
+            }
+          });
+        });
 
         // Click backdrop to close
         introModal?.addEventListener("click", (e) => { if(e.target === introModal) closeModal(introModal); });
