@@ -202,7 +202,7 @@
 
     .modal-close{
       position:absolute;
-      top:10px;
+      top:12px;
       right:10px;
       background:#f2f2f2;
       color:#111;
@@ -339,7 +339,7 @@
       </div>
     </div>
 
-      <!-- Image Modal2 (PLACED OUTSIDE main so it never affects layout) -->
+    <!-- Image Modal2 (PLACED OUTSIDE main so it never affects layout) -->
     <div id="imageModal2" class="modal" aria-hidden="true">
       <div class="modal-box modal-box-image" role="dialog" aria-modal="true" aria-labelledby="imageTitle2">
         <button class="modal-close" type="button" aria-label="Close">&times;</button>
@@ -368,10 +368,13 @@
 
         const introModal = document.getElementById("introModal");
         const imageModal = document.getElementById("imageModal");
+        const imageModal2 = document.getElementById("imageModal2");
 
         const openIntro = document.getElementById("openIntroModal");
         const openImage = document.getElementById("openImageModal");
         const openThumb = document.getElementById("openImageThumb");
+        const openImage2 = document.getElementById("openImageModal2");
+        const openThumb2 = document.getElementById("openImageThumb2");
 
         openIntro?.addEventListener("click", (e) => {
           e.preventDefault();
@@ -385,6 +388,15 @@
 
         openThumb?.addEventListener("click", () => {
           openModal(imageModal);
+        });
+
+        openImage2?.addEventListener("click", (e) => {
+          e.preventDefault();
+          openModal(imageModal2);
+        });
+
+        openThumb2?.addEventListener("click", () => {
+          openModal(imageModal2);
         });
 
         // Close buttons
