@@ -207,7 +207,7 @@
       background:#f2f2f2;
       color:#111;
       width:34px;
-      height:34px;
+      height:1px;
       border:0;
       border-radius:999px;
       text-align:center;
@@ -402,10 +402,12 @@
         // Close buttons
         introModal?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(introModal));
         imageModal?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(imageModal));
+        imageModal?.querySelector(".modal-close")?.addEventListener("click", () => closeModal(imageModal2));
 
         // Click backdrop to close
         introModal?.addEventListener("click", (e) => { if(e.target === introModal) closeModal(introModal); });
         imageModal?.addEventListener("click", (e) => { if(e.target === imageModal) closeModal(imageModal); });
+        imageModal2?.addEventListener("click", (e) => { if(e.target === imageModal2) closeModal(imageModal2); });
 
         // ESC closes whichever is open
         document.addEventListener("keydown", (e) => {
