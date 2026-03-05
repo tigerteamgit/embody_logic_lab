@@ -277,6 +277,11 @@
     <div class="btns">
       <button class="btn-primary" id="startBtn" type="button">Start Lab</button>
       <button class="btn-soft" id="viewResultsBtn" type="button">View Stored Results</button>
+      <!-- ---- Baseline Upload ---- -->
+      <div class="baseline-upload">
+      <label for="baselineFile" class="button secondary">Upload Baseline</label>
+      <input type="file" id="baselineFile" accept=".json" hidden />
+      </div>
     </div>
   </div>
 
@@ -358,15 +363,7 @@
       </button>
     </div>
   </div>
-</main>
-
-<!-- ---- Baseline Upload ---- -->
-<div class="baseline-upload">
-  <label for="baselineFile" class="button secondary">
-    Upload Baseline
-  </label>
-  <input type="file" id="baselineFile" accept=".json" hidden />
-</div>  
+</main>  
 
 <!-- ---- Chart.js (load once) ---- -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
