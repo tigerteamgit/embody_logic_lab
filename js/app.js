@@ -881,7 +881,7 @@
       saveAttempt(attempt);
 
       // ✅ Send to your Google Form (which writes into your linked "embody analytics" Sheet)
-      submitToGoogleForm(attempt);
+      /*submitToGoogleForm(attempt);*/
 
       showResults(attempt);
     }
@@ -967,7 +967,7 @@
     }
 
     /* ---- CSV Export ---- */
-    function exportCSV(){
+   /* function exportCSV(){
       const attempts = loadAttempts();
       if(attempts.length === 0){
         alert("No attempts stored on this device yet.");
@@ -993,8 +993,8 @@
         return vals.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(",");
       });
 
-      const csv = headers.join(",") + "\n" + rows.join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const csv = headers.join(",") + "\n" + rows.join("\n"); 
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" }); */
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
