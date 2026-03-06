@@ -198,5 +198,41 @@
   }
 
   document.addEventListener("DOMContentLoaded", renderCharts);
+
+  /* ---- Comments Section ---- */
+  function initChartComments() {
+    const chartForm = document.getElementById('chart-comment-form');
+    const chartCommentList = document.getElementById('chart-comments-list');
+
+    if (!chartForm || !chartCommentList) return;
+
+    // Load saved comments
+    const savedComments = JSON.parse(localStorage.getItem('chartComments')) || [];
+    savedComments.forEach(displayChartComment);
+
+    // Handle form submit
+    chartForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = document.getElementById('chart-comment-text').value.trim();
+      const name = document.getElementById('chart-comment-name').value.trim() || "Anonymous";
+      if (!text) return;
+
+      const comment = { name, text, date: new Date().toLocaleString() };
+      displayChartComment(comment);
+
+      const saved = JSON.parse(localStorage.getItem('chartComments')) || [];
+      saved.push(comment);
+      localStorage.setItem('chartComments', JSON.stringify(saved));
+
+      chartForm.reset();
+    });
+
+    function displayChartComment(comment) {
+      const div = document.createElement('div');
+      div.classList.add('comment-item');
+      div.innerHTML = `<strong>${comment.name}</strong> <em>${comment.date}</em><p>${comment.text}</p>`;
+      chartCommentList.appendChild(div);
+    }
+  }
 })();
 </script>
