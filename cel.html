@@ -358,7 +358,7 @@
 
     <div id="comparisonBlock"></div>
 
-    <div class="card" id="feedbackCard">
+    <div class="card" id="feedbackCard" style="display:none;">
       <h3>Feedback</h3>
       <textarea id="feedback" rows="3" placeholder="Optional comments..."></textarea>
     </div>
@@ -943,6 +943,10 @@ function showLab(){
   unlockNext();
 }
 function showResults(attempt){
+  
+  document.getElementById("feedbackCard").style.display =
+    attempt.phase === "post" ? "block" : "none";
+  
   window.CEL_LAST_ATTEMPT = attempt;
   introCard.style.display = "none";
   labCard.style.display = "none";
@@ -1177,6 +1181,7 @@ function finishAndScore(){
       /*displayName: state.displayName,*/
       age: state.age ?? "",
       gender: state.gender ?? "",
+      feedback: document.getElementById("feedback").value,
       startedAt: state.startedAt,
       finishedAt: state.finishedAt,
       activeSeconds: elapsedSec,
@@ -1374,7 +1379,8 @@ window.submitLabToMake = function submitLabToMake(){
     age: document.getElementById("age")?.value || "",
     gender: document.getElementById("gender")?.value || "",
     sei: document.getElementById("seiTotalN")?.textContent?.trim() || "",
-    cei: document.getElementById("ceiTotalN")?.textContent?.trim() || ""
+    cei: document.getElementById("ceiTotalN")?.textContent?.trim() || "",
+    feedback: document.getElementById("feedback").value
   };
 
   console.log("[CEL→MAKE] payload:", payload);
