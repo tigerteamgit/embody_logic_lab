@@ -254,7 +254,7 @@ textarea{
 }
 
 /* ---- Notices ---- */
-.notice{
+/*.notice{
   border-radius: 14px;
   padding: 12px 14px;
   color: rgba(234,240,255,.92);
@@ -262,6 +262,14 @@ textarea{
   background:
     radial-gradient(700px 220px at 15% 0%, rgba(255,189,58,.14), transparent 55%),
     linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+}*/
+
+.notice {
+    background: #dffcff;
+    border: 1px solid #0c0c0b;
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: #0c0c0b;
 }
 
 .notice strong{
