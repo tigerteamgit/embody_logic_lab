@@ -279,7 +279,7 @@
       <label for="baselineFile" class="button secondary">
         Upload Baseline JSON
       </label>
-      <input type="file" id="baselineFile" accept=".json" style="display:none />
+      <input type="file" id="baselineFile" accept=".json" hidden />
     </div>
 
     <div class="btns">
@@ -1413,16 +1413,7 @@ window.submitLabToMake = function submitLabToMake(){
     console.error(err);
     alert("Network error.");
   });
-/*
-  // ✅ Simple request -> no preflight
-  fetch(MAKE_WEBHOOK_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain;charset=UTF-8" },
-    body: JSON.stringify(payload),
-    keepalive: true
-  });
-*/
+
   alert("Submitted ✅");
 };
 </script>
