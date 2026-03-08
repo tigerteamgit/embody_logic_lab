@@ -412,6 +412,15 @@ function fmtTime(sec){
   return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
+/* ---- Toggle baseline upload visibility ---- */
+function updateBaselineUploadVisibility(){
+  const attempt = document.getElementById("attemptType")?.value;
+  const row = document.getElementById("baselineUploadRow");
+  if(!row) return;
+
+  row.style.display = attempt === "post" ? "block" : "none";
+}  
+
 /* ---- Round definitions (Somatic first) ---- */
 const ROUNDS = [
   {
@@ -1364,6 +1373,7 @@ safeBindClick("resetAllBtn", resetAll);
 
 /* ---- Init ---- */
 showIntro();
+updateBaselineUpload();  
 console.log("[CEL] loaded. Try CEL.checks(), CEL.manualTimer.start(), CEL.manualTimer.stop()");
 </script>
 
