@@ -41,6 +41,15 @@
 
 <script src="wheel.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mediaelement@7/dist/mediaelement-and-player.min.js"></script> 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const player = new MediaElementPlayer("player", {
+        features: ['playpause','progress','current','duration','volume']
+    });
+
+});
+</script> 
 
 </body>
 </html>
