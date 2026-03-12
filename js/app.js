@@ -1058,6 +1058,11 @@ if (fullAccessCard && isUnlocked) {
       setTimeout(() => el.classList.remove("is-pressed"), 180);
     }
 
+    /* ---- Gumroad Redirect ---- */
+    function goToGumroad(){
+      window.location.href = "https://yourproduct.gumroad.com/l/your-product";
+    }
+
     /* ---- Bind buttons safely ---- */
     bind("startBtn", startLab);
     bind("viewResultsBtn", showStoredResults);
@@ -1065,6 +1070,7 @@ if (fullAccessCard && isUnlocked) {
     bind("retakeBtn", () => { resetAttempt(false); showIntro(); });
     bind("backHomeBtn", showIntro);
     bind("exportBtn", exportCSV);
+    bind("backToGum", goToGumroad);
     /*bind("resetAllBtn", resetAll);*/
 
     /* Timer buttons */
