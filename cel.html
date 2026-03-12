@@ -378,6 +378,10 @@
       <button class="btn-primary" id="submitMakeBtn" type="button" onclick="submitLabToMake()">
         Submit to Make
       </button>
+      <button class="btn-primary" id="submitMakeBtn" type="button" onclick="backToGum()">
+        Back to Gumroad
+      </button>
+      
     </div>
   </div>
 </main> 
@@ -1386,6 +1390,7 @@ safeBindClick("retakeBtn", () => { resetAttempt(false); showIntro(); });
 safeBindClick("backHomeBtn", showIntro);
 safeBindClick("exportBtn", exportJSON);
 safeBindClick("resetAllBtn", resetAll);
+safeBindClick("backToGum", gotToGumroad);
 
 /* ---- Init ---- */
 showIntro();
